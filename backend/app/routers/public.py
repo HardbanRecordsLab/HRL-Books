@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.config import get_settings
 from app.db import get_db
 from app.models import Asset, Book, BookContributor, Edition, Listing, Person, Product, Workspace
 from app.routers.assets import asset_public_url
@@ -56,7 +57,15 @@ def catalog(ws_slug: str, db: Session = Depends(get_db)):
     ws = _ws(db, ws_slug)
     books = db.scalars(select(Book).where(Book.workspace_id == ws.id, Book.public.is_(True), Book.deleted_at.is_(None))
                        .order_by(Book.series_name, Book.series_volume, Book.title))
-    return {"name": ws.name, "slug": ws.slug, "books": [_card(db, ws, b) for b in books]}
+    books = list(books)
+    titles = {b.id: b.title for b in books}
+    products = db.scalars(select(Product).where(Product.workspace_id == ws.id, Product.active.is_(True)).order_by(Product.created_at.desc()))
+    return {"name": ws.name, "slug": ws.slug, "books": [_card(db, ws, b) for b in books],
+            # merch ("nie tylko książki"): standalone products and those tied to a public title
+            "products": [{k: o[k] for k in ("id", "title", "catalog_label", "design_url", "price", "currency")}
+                         | {"book_title": titles.get(p.book_id, ""), "url": f"{get_settings().APP_URL}/sklep/{p.id}"}
+                         for p in products if not p.book_id or p.book_id in titles
+                         for o in (product_out(db, p),)]}
 
 
 @router.get("/{ws_slug}/{slug}")
@@ -74,14 +83,14 @@ def book_page(ws_slug: str, slug: str, db: Session = Depends(get_db)):
     people = _people(db, b)
     products = db.scalars(select(Product).where(Product.book_id == b.id, Product.active.is_(True)).order_by(Product.created_at))
     return {
-        **_card(db, ws, b), "publisher": ws.name, "language": b.language, "desc_long": b.desc_long,
+        **_card(db, ws, b), "publisher": ws.name, "url": f"{get_settings().APP_URL}/ksiegarnia/{ws.slug}/{b.slug}", "language": b.language, "desc_long": b.desc_long,
         "authors_bio": [{"name": p.display_name, "bio": p.bio_long or p.bio_short} for c, p in people if c.role == "author"],
         "contributors": [{"name": p.display_name, "role": ROLE_PL.get(c.role, c.role)} for c, p in people if c.role != "author"],
         "editions": [{"format": FORMATS.get(e.format, e.format), "release_date": e.release_date, "isbn": e.isbn, "pages": e.pages}
                      for e in db.scalars(select(Edition).where(Edition.book_id == b.id).order_by(Edition.created_at))],
         "stores": links,
         "products": [{k: o[k] for k in ("id", "title", "catalog_label", "design_url", "price", "currency")}
-                     for o in (product_out(db, p) for p in products)],
+                     | {"url": f"{get_settings().APP_URL}/sklep/{o['id']}"} for o in (product_out(db, p) for p in products)],
         "ai_disclosure": b.ai_disclosure,
         "more": [_card(db, ws, x) for x in db.scalars(
             select(Book).where(Book.workspace_id == ws.id, Book.public.is_(True), Book.deleted_at.is_(None), Book.id != b.id)

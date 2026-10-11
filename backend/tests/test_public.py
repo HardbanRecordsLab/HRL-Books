@@ -23,7 +23,8 @@ def test_public_page_lifecycle(client):
     assert page["title"] == "Rodzic bez poczucia winy" and page["authors"] == ["Kamil Skomra"]
     assert page["stores"] == [{"url": "https://www.amazon.pl/dp/B0TEST", "label": "Amazon"}]
     assert page["cover_url"].startswith("https://") and page["editions"][0]["format"] == "E-book (EPUB)"
-    assert [b["slug"] for b in client.get("/api/v1/public/w/wydawnictwo").json()["books"]] == ["rodzic-bez-poczucia-winy"]
+    cat = client.get("/api/v1/public/w/wydawnictwo").json()
+    assert [b["slug"] for b in cat["books"]] == ["rodzic-bez-poczucia-winy"] and cat["products"] == []
 
     other = client.post(f"{base}/books", headers=h, json={"title": "Rodzic bez poczucia winy"}).json()["id"]
     assert client.patch(f"{base}/books/{other}", headers=h, json={"public": True}).json()["slug"] == "rodzic-bez-poczucia-winy-2"
