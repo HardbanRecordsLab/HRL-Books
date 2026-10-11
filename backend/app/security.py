@@ -101,6 +101,7 @@ PERMISSIONS: dict[str, set[str]] = {
     "edit_metadata": {"owner", "editor"},
     "edit_book": {"owner", "editor", "author"},
     "manage_distribution": {"owner"},
+    "read_distribution": {"owner", "editor", "author"},
     "royalties": {"owner"},
 }
 

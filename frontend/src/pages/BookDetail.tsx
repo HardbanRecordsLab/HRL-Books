@@ -1,8 +1,9 @@
 import { FormEvent, useEffect, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useWorkspace } from "../App";
 import { ApiError, api, Book, STATUS_LABELS } from "../lib/api";
 import MetadataTab from "./MetadataTab";
+import DistributionTab from "./DistributionTab";
 
 type StoreLink = { url: string; channel?: string };
 type BookFull = Book & { store_links: StoreLink[] };
@@ -35,7 +36,9 @@ export default function BookDetail() {
   const workspace = useWorkspace();
   const navigate = useNavigate();
   const [book, setBook] = useState<BookFull | null>(null);
-  const [tab, setTab] = useState<(typeof TABS)[number]>("Przegląd");
+  const [params] = useSearchParams();
+  const initialTab = (TABS as readonly string[]).includes(params.get("tab") || "") ? (params.get("tab") as (typeof TABS)[number]) : "Przegląd";
+  const [tab, setTab] = useState<(typeof TABS)[number]>(initialTab);
   const [error, setError] = useState("");
   const [saved, setSaved] = useState("");
   const [newLink, setNewLink] = useState("");
@@ -145,7 +148,19 @@ export default function BookDetail() {
         <MetadataTab base={`/workspaces/${ws}/books/${id}`} canEdit={["owner", "editor"].includes(workspace?.role || "")} />
       )}
 
-      {tab !== "Przegląd" && tab !== "Metadane" && (
+      {tab === "Dystrybucja" && (
+        <DistributionTab
+          base={`/workspaces/${ws}/books/${id}`}
+          canManage={workspace?.role === "owner"}
+          onPublished={() => {
+            if (book.status !== "published" && confirm("Książka jest już w sprzedaży. Zmienić jej etap na „Opublikowana”?")) {
+              save(undefined, { status: "published" });
+            }
+          }}
+        />
+      )}
+
+      {tab !== "Przegląd" && tab !== "Metadane" && tab !== "Dystrybucja" && (
         <div className="card empty">
           <h3>{tab}</h3>
           <p>{COMING[tab]}</p>

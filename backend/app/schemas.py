@@ -206,3 +206,29 @@ class EditionOut(EditionIn):
     model_config = ConfigDict(from_attributes=True)
     id: str
     book_id: str
+
+
+ListingStatus = Literal["not_ready", "ready", "sent", "in_review", "published", "rejected", "withdrawn"]
+
+
+class ListingIn(BaseModel):
+    status: ListingStatus | None = None
+    url: str | None = Field(default=None, max_length=1000)
+    notes: str | None = Field(default=None, max_length=5000)
+    rejection_reason: str | None = Field(default=None, max_length=2000)
+    checklist: list[int] | None = Field(default=None, max_length=50)
+    edition_id: str | None = None
+
+
+class ListingOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    channel: str
+    market: str
+    status: str
+    url: str
+    notes: str
+    rejection_reason: str
+    checklist: list[int]
+    edition_id: str | None
+    sent_at: datetime | None
+    published_at: datetime | None

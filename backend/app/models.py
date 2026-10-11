@@ -166,3 +166,23 @@ class Edition(Base):
     # [{"market": "PL", "currency": "PLN", "amount": 39.99}]
     prices: Mapped[list] = mapped_column(JSON, default=list)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class Listing(Base):
+    """A title (optionally a specific edition) in a distribution channel (spec 6.7, FR-DIST-02..06)."""
+    __tablename__ = "listings"
+    __table_args__ = (UniqueConstraint("book_id", "channel", "market"),)
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_id)
+    workspace_id: Mapped[str] = mapped_column(ForeignKey("workspaces.id", ondelete="CASCADE"), index=True)
+    book_id: Mapped[str] = mapped_column(ForeignKey("books.id", ondelete="CASCADE"), index=True)
+    edition_id: Mapped[str | None] = mapped_column(ForeignKey("editions.id", ondelete="SET NULL"), nullable=True)
+    channel: Mapped[str] = mapped_column(String(30))
+    market: Mapped[str] = mapped_column(String(10), default="all")
+    status: Mapped[str] = mapped_column(String(20), default="not_ready")
+    url: Mapped[str] = mapped_column(String(1000), default="")
+    notes: Mapped[str] = mapped_column(Text, default="")
+    rejection_reason: Mapped[str] = mapped_column(Text, default="")
+    checklist: Mapped[list] = mapped_column(JSON, default=list)  # indexes of completed steps
+    sent_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    published_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
