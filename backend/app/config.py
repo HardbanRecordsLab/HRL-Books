@@ -30,6 +30,11 @@ class Settings(BaseSettings):
     GELATO_API_KEY: str | None = None
     STRIPE_SECRET_KEY: str | None = None
     STRIPE_WEBHOOK_SECRET: str | None = None
+    OPENROUTER_API_KEY: str | None = None
+    LLM_BASE_URL: str = "https://openrouter.ai/api/v1"
+    LLM_MODEL: str = "deepseek/deepseek-chat-v3-0324"
+    LLM_MODEL_FALLBACK: str = "meta-llama/llama-3.3-70b-instruct"
+    LLM_TIMEOUT: int = 180
     SHOP_COUNTRIES: str = "PL,DE,CZ,SK,LT,AT,NL,BE,FR,IT,ES,IE,DK,SE,FI,PT,GB,US"
 
     @field_validator("JWT_SECRET")

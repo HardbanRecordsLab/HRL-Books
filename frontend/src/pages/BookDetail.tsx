@@ -8,15 +8,16 @@ import MetadataTab from "./MetadataTab";
 import DistributionTab from "./DistributionTab";
 import ProductsTab from "./ProductsTab";
 import ResearchTab from "./ResearchTab";
+import { AiTab, ChapterAi } from "./AiPanel";
 
 
 type StoreLink = { url: string; channel?: string };
 type BookFull = Book & { store_links: StoreLink[] };
 
-const TABS = ["Przegląd", "Metadane", "Produkty i druk", "Dystrybucja", "Research", "Rękopis", "Tantiemy"] as const;
+const TABS = ["Przegląd", "Metadane", "Produkty i druk", "Dystrybucja", "Research", "Rękopis", "Asystent AI", "Tantiemy"] as const;
 const COMING: Record<string, string> = {
   Metadane: "Autorzy z rolami, opisy, słowa kluczowe, kategorie, wydania i ceny — jedno źródło danych dla wszystkich sklepów.",
-  "Produkty i druk": "Wersje papierowe (Lulu) i gadżety (Gelato) — druk na żądanie, płatność tylko za zamówienie.",
+  "Produkty i druk": "Druk na żądanie przez Gelato — płatność tylko za zamówienie.",
   Dystrybucja: "Tablica sklepów ze statusami, paczki plików i checklisty dla KDP, Google Play, Kobo, Draft2Digital i Virtualo.",
   Research: "Źródła, notatki i cytaty z wyszukiwarką oraz przycisk „research zamknięty”.",
   Rękopis: "Rozdziały z historią wersji, import z Worda, redakcja z pomocą AI i eksport EPUB.",
@@ -175,11 +176,18 @@ export default function BookDetail() {
 
       {tab === "Rękopis" && (
         <Suspense fallback={<div className="muted">Ładowanie edytora…</div>}>
-          <ManuscriptTab base={`/workspaces/${ws}/books/${id}`} canEdit={["owner", "editor", "author"].includes(workspace?.role || "")} />
+          <ManuscriptTab base={`/workspaces/${ws}/books/${id}`} canEdit={["owner", "editor", "author"].includes(workspace?.role || "")}
+            aiSlot={["owner", "editor", "author"].includes(workspace?.role || "") ? (ch, reload, dirty) => (
+              <ChapterAi base={`/workspaces/${ws}/books/${id}`} chapter={ch} dirty={dirty} reload={reload} enabled={!!workspace?.ai_enabled} ws={ws!} />
+            ) : undefined} />
         </Suspense>
       )}
 
-      {!["Przegląd", "Metadane", "Dystrybucja", "Produkty i druk", "Research", "Rękopis"].includes(tab) && (
+      {tab === "Asystent AI" && (
+        <AiTab base={`/workspaces/${ws}/books/${id}`} ws={ws!} canUse={["owner", "editor", "author"].includes(workspace?.role || "")} />
+      )}
+
+      {!["Przegląd", "Metadane", "Dystrybucja", "Produkty i druk", "Research", "Rękopis", "Asystent AI"].includes(tab) && (
         <div className="card empty">
           <h3>{tab}</h3>
           <p>{COMING[tab]}</p>

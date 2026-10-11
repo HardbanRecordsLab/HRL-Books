@@ -36,7 +36,7 @@ function Toolbar({ editor }: { editor: ReturnType<typeof useEditor> }) {
 }
 
 export default function ManuscriptTab({ base, canEdit, aiSlot }: { base: string; canEdit: boolean;
-  aiSlot?: (chapter: ChapterFull, reload: () => void) => React.ReactNode }) {
+  aiSlot?: (chapter: ChapterFull, reload: () => void, dirty: boolean) => React.ReactNode }) {
   const url = `${base}/chapters`;
   const [list, setList] = useState<{ chapters: ChapterRow[]; words: number } | null>(null);
   const [current, setCurrent] = useState<ChapterFull | null>(null);
@@ -198,7 +198,7 @@ export default function ManuscriptTab({ base, canEdit, aiSlot }: { base: string;
               </div>
               {error && <div className="error">{error}</div>}
             </div>
-            {aiSlot && current && aiSlot(current, () => open(current.id))}
+            {aiSlot && current && aiSlot(current, () => { loadList(); open(current.id); }, dirty)}
             {versions && (
               <div className="card stack">
                 <h3>Historia wersji</h3>

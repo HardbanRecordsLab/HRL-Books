@@ -108,6 +108,7 @@ PERMISSIONS: dict[str, set[str]] = {
     "edit_research": {"owner", "author"},
     "edit_manuscript": {"owner", "editor", "author"},
     "upload_files": {"owner", "editor", "author"},
+    "use_ai": {"owner", "editor", "author"},
 }
 
 
