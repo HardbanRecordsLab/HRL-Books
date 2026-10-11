@@ -95,6 +95,8 @@ class BookPatchIn(BaseModel):
     status: BookStatus | None = None
     desc_short: str | None = Field(default=None, max_length=2000)
     store_links: list[StoreLink] | None = Field(default=None, max_length=50)
+    # Soft research gate: reason for entering 'writing' before research is closed (FR-RES-05).
+    gate_override_reason: str | None = Field(default=None, max_length=1000)
 
 
 class BookImportItem(BookIn):

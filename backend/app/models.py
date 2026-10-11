@@ -245,3 +245,76 @@ class Order(Base):
     error: Mapped[str] = mapped_column(Text, default="")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class ResearchSource(Base):
+    """FR-RES-01: a source (URL, file, bibliographic entry) for a title."""
+    __tablename__ = "research_sources"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_id)
+    workspace_id: Mapped[str] = mapped_column(ForeignKey("workspaces.id", ondelete="CASCADE"), index=True)
+    book_id: Mapped[str] = mapped_column(ForeignKey("books.id", ondelete="CASCADE"), index=True)
+    kind: Mapped[str] = mapped_column(String(20), default="url")  # url | file | book | article | interview | other
+    title: Mapped[str] = mapped_column(String(500))
+    url: Mapped[str] = mapped_column(String(2000), default="")
+    citation: Mapped[str] = mapped_column(Text, default="")
+    accessed_on: Mapped[str] = mapped_column(String(10), default="")
+    asset_id: Mapped[str | None] = mapped_column(ForeignKey("assets.id", ondelete="SET NULL"), nullable=True)
+    created_by: Mapped[str] = mapped_column(ForeignKey("users.id"))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class ResearchNote(Base):
+    """FR-RES-02/03: a note or quote, tied to a source (quotes must have one) and optionally a chapter."""
+    __tablename__ = "research_notes"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_id)
+    workspace_id: Mapped[str] = mapped_column(ForeignKey("workspaces.id", ondelete="CASCADE"), index=True)
+    book_id: Mapped[str] = mapped_column(ForeignKey("books.id", ondelete="CASCADE"), index=True)
+    source_id: Mapped[str | None] = mapped_column(ForeignKey("research_sources.id", ondelete="SET NULL"), nullable=True)
+    chapter_id: Mapped[str | None] = mapped_column(ForeignKey("chapters.id", ondelete="SET NULL"), nullable=True)
+    is_quote: Mapped[bool] = mapped_column(Boolean, default=False)
+    body: Mapped[str] = mapped_column(Text)
+    page_ref: Mapped[str] = mapped_column(String(100), default="")
+    tags: Mapped[list] = mapped_column(JSON, default=list)
+    created_by: Mapped[str] = mapped_column(ForeignKey("users.id"))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class ResearchGate(Base):
+    """FR-RES-05: research closed before writing (hard or soft, per workspace)."""
+    __tablename__ = "research_gates"
+    book_id: Mapped[str] = mapped_column(ForeignKey("books.id", ondelete="CASCADE"), primary_key=True)
+    workspace_id: Mapped[str] = mapped_column(ForeignKey("workspaces.id", ondelete="CASCADE"), index=True)
+    closed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    closed_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    note: Mapped[str] = mapped_column(Text, default="")
+    override_reason: Mapped[str] = mapped_column(Text, default="")
+
+
+CHAPTER_STATUSES = ("draft", "to_edit", "edited", "approved")
+
+
+class Chapter(Base):
+    __tablename__ = "chapters"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_id)
+    workspace_id: Mapped[str] = mapped_column(ForeignKey("workspaces.id", ondelete="CASCADE"), index=True)
+    book_id: Mapped[str] = mapped_column(ForeignKey("books.id", ondelete="CASCADE"), index=True)
+    title: Mapped[str] = mapped_column(String(500))
+    position: Mapped[int] = mapped_column(Integer, default=0)
+    status: Mapped[str] = mapped_column(String(20), default="draft")
+    language: Mapped[str] = mapped_column(String(10), default="pl")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class ChapterVersion(Base):
+    """FR-MS-03: every save is a new version (compare/restore). origin: human | ai | import."""
+    __tablename__ = "chapter_versions"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_id)
+    workspace_id: Mapped[str] = mapped_column(ForeignKey("workspaces.id", ondelete="CASCADE"), index=True)
+    chapter_id: Mapped[str] = mapped_column(ForeignKey("chapters.id", ondelete="CASCADE"), index=True)
+    body: Mapped[str] = mapped_column(Text, default="")  # sanitized HTML
+    words: Mapped[int] = mapped_column(Integer, default=0)
+    chars: Mapped[int] = mapped_column(Integer, default=0)
+    origin: Mapped[str] = mapped_column(String(10), default="human")
+    note: Mapped[str] = mapped_column(String(300), default="")
+    created_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)

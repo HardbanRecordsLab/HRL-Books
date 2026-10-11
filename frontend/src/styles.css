@@ -80,3 +80,15 @@ tr.click:hover td { background: var(--panel-2); }
 .center { min-height: 100vh; display: grid; place-items: center; padding: 1rem; }
 .auth { width: 100%; max-width: 380px; }
 .empty { text-align: center; padding: 2rem 1rem; color: var(--muted); }
+
+.manuscript .ProseMirror {
+  min-height: 420px; padding: 1.2rem 1.4rem; background: var(--bg); border: 1px solid var(--line); border-radius: 8px;
+  font-family: Georgia, "Times New Roman", serif; font-size: 1.05rem; line-height: 1.75; max-width: 46rem; outline: none;
+}
+.manuscript .ProseMirror:focus { border-color: var(--gold); }
+.manuscript .ProseMirror p { margin: 0 0 .9em; }
+.manuscript .ProseMirror blockquote { border-left: 3px solid var(--gold); margin: 1em 0; padding-left: 1em; color: var(--muted); }
+@media (max-width: 760px) {
+  .grid[style*="minmax(200px"] { grid-template-columns: 1fr !important; }
+  .grid[style*="minmax(200px"] > .card { position: static !important; }
+}

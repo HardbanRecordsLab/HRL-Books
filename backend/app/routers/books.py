@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from app.audit import audit
 from app.db import get_db
 from app.deps import require
-from app.models import Book, Membership, Workspace, utcnow
+from app.models import Book, Membership, ResearchGate, Workspace, utcnow
 from app.schemas import BookImportIn, BookIn, BookOut, BookPatchIn
 
 router = APIRouter(prefix="/api/v1/workspaces/{ws}/books", tags=["books"])
@@ -61,6 +61,19 @@ def patch_book(book_id: str, body: BookPatchIn, m: Membership = Depends(require(
                db: Session = Depends(get_db)):
     b = _book(db, m.workspace_id, book_id)
     changes = body.model_dump(mode="json", exclude_none=True)
+    reason = changes.pop("gate_override_reason", "").strip()
+    if changes.get("status") == "writing" and b.status in ("idea", "research"):
+        gate = db.get(ResearchGate, b.id)
+        if not (gate and gate.closed_at):
+            mode = db.get(Workspace, m.workspace_id).research_gate_mode
+            if mode == "hard":
+                raise HTTPException(409, "Najpierw zamknij research (bramka twarda).")
+            if not reason:
+                raise HTTPException(409, "Research nie jest zamknięty — podaj powód, aby przejść do pisania.")
+            gate = gate or ResearchGate(book_id=b.id, workspace_id=m.workspace_id)
+            gate.override_reason = reason
+            db.add(gate)
+            audit(db, "research.gate_overridden", m.user_id, m.workspace_id, target=b.id, reason=reason)
     for k, v in changes.items():
         setattr(b, k, v)
     audit(db, "book.updated", m.user_id, m.workspace_id, target=b.id, fields=sorted(changes))

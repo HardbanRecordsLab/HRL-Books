@@ -1,10 +1,14 @@
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, Suspense, lazy, useEffect, useState } from "react";
+
+const ManuscriptTab = lazy(() => import("./ManuscriptTab"));
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useWorkspace } from "../App";
 import { ApiError, api, Book, STATUS_LABELS } from "../lib/api";
 import MetadataTab from "./MetadataTab";
 import DistributionTab from "./DistributionTab";
 import ProductsTab from "./ProductsTab";
+import ResearchTab from "./ResearchTab";
+
 
 type StoreLink = { url: string; channel?: string };
 type BookFull = Book & { store_links: StoreLink[] };
@@ -165,7 +169,17 @@ export default function BookDetail() {
         <ProductsTab ws={ws!} bookId={id!} bookTitle={book.title} canManage={workspace?.role === "owner"} />
       )}
 
-      {tab !== "Przegląd" && tab !== "Metadane" && tab !== "Dystrybucja" && tab !== "Produkty i druk" && (
+      {tab === "Research" && (
+        <ResearchTab base={`/workspaces/${ws}/books/${id}`} canEdit={["owner", "author"].includes(workspace?.role || "")} />
+      )}
+
+      {tab === "Rękopis" && (
+        <Suspense fallback={<div className="muted">Ładowanie edytora…</div>}>
+          <ManuscriptTab base={`/workspaces/${ws}/books/${id}`} canEdit={["owner", "editor", "author"].includes(workspace?.role || "")} />
+        </Suspense>
+      )}
+
+      {!["Przegląd", "Metadane", "Dystrybucja", "Produkty i druk", "Research", "Rękopis"].includes(tab) && (
         <div className="card empty">
           <h3>{tab}</h3>
           <p>{COMING[tab]}</p>

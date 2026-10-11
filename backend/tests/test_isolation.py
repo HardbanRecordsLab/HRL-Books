@@ -75,8 +75,8 @@ def test_patch_book_and_members(client):
     ws, owner = make_workspace(client, "hrl-books", "owner@example.com")
     h = auth(owner["access_token"])
     book = _book(client, ws, owner)
-    r = client.patch(f"/api/v1/workspaces/{ws}/books/{book}", headers=h, json={"status": "writing", "subtitle": "Poradnik"})
-    assert r.status_code == 200 and r.json()["status"] == "writing" and r.json()["subtitle"] == "Poradnik"
+    r = client.patch(f"/api/v1/workspaces/{ws}/books/{book}", headers=h, json={"status": "editing", "subtitle": "Poradnik"})
+    assert r.status_code == 200 and r.json()["status"] == "editing" and r.json()["subtitle"] == "Poradnik"
     assert client.patch(f"/api/v1/workspaces/{ws}/books/{book}", headers=h, json={"status": "nonsense"}).status_code == 422
     members = client.get(f"/api/v1/workspaces/{ws}/members", headers=h).json()
     assert [(m["email"], m["role"]) for m in members] == [("owner@example.com", "owner")]
