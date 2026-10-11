@@ -10,6 +10,7 @@ import Admin from "./pages/Admin";
 import Distribution from "./pages/Distribution";
 import Shop from "./pages/Shop";
 import { PublicProductPage, ThankYouPage } from "./pages/PublicShop";
+import { BookshopPage, PublicBookPage } from "./pages/PublicBook";
 
 type Session = { me: Me; workspaces: Workspace[]; reload: () => Promise<void> };
 const SessionCtx = createContext<Session | null>(null);
@@ -116,6 +117,8 @@ export default function App() {
       <Route path="/rejestracja" element={<Register />} />
       <Route path="/sklep/dziekujemy" element={<ThankYouPage />} />
       <Route path="/sklep/:id" element={<PublicProductPage />} />
+      <Route path="/ksiegarnia/:ws" element={<BookshopPage />} />
+      <Route path="/ksiegarnia/:ws/:slug" element={<PublicBookPage />} />
       <Route path="/*" element={<RequireAuth />} />
     </Routes>
   );

@@ -12,7 +12,8 @@ import { AiTab, ChapterAi } from "./AiPanel";
 
 
 type StoreLink = { url: string; channel?: string };
-type BookFull = Book & { store_links: StoreLink[] };
+type BookFull = Book & { store_links: StoreLink[]; public: boolean; slug: string };
+type AssetRow = { id: string; kind: string; url: string; content_type: string };
 
 const TABS = ["Przegląd", "Metadane", "Produkty i druk", "Dystrybucja", "Research", "Rękopis", "Asystent AI", "Tantiemy"] as const;
 const COMING: Record<string, string> = {
@@ -48,9 +49,13 @@ export default function BookDetail() {
   const [error, setError] = useState("");
   const [saved, setSaved] = useState("");
   const [newLink, setNewLink] = useState("");
+  const [cover, setCover] = useState<string>("");
+  const [slugDraft, setSlugDraft] = useState("");
 
   useEffect(() => {
-    api<BookFull>(`/workspaces/${ws}/books/${id}`).then(setBook).catch((e) => setError(e.message));
+    api<BookFull>(`/workspaces/${ws}/books/${id}`).then((b) => { setBook(b); setSlugDraft(b.slug); }).catch((e) => setError(e.message));
+    api<AssetRow[]>(`/workspaces/${ws}/assets?book_id=${id}`)
+      .then((a) => setCover(a.find((x) => x.kind === "cover" && x.content_type.startsWith("image/"))?.url || "")).catch(() => {});
   }, [ws, id]);
 
   if (error && !book) return <div className="error">{error}</div>;
@@ -66,7 +71,9 @@ export default function BookDetail() {
         title: book.title, subtitle: book.subtitle, language: book.language, status: book.status,
         desc_short: book.desc_short,
       };
-      setBook(await api<BookFull>(`/workspaces/${ws}/books/${id}`, { method: "PATCH", body }));
+      const nb = await api<BookFull>(`/workspaces/${ws}/books/${id}`, { method: "PATCH", body });
+      setBook(nb);
+      setSlugDraft(nb.slug);
       setSaved("Zapisano.");
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Nie udało się zapisać.");
@@ -79,6 +86,17 @@ export default function BookDetail() {
     save(undefined, { store_links: [...book.store_links, { url: newLink.trim() }] });
     setNewLink("");
   };
+
+  const uploadCover = async (f: File | undefined) => {
+    if (!f) return;
+    const fd = new FormData();
+    fd.append("file", f); fd.append("kind", "cover"); fd.append("book_id", id!);
+    const r = await fetch(`/api/v1/workspaces/${ws}/assets`, { method: "POST", body: fd,
+      headers: { Authorization: `Bearer ${localStorage.getItem("hrlb_access")}` } });
+    const d = await r.json().catch(() => ({}));
+    if (r.ok) setCover(d.url); else setError(typeof d.detail === "string" ? d.detail : "Nie udało się wgrać okładki.");
+  };
+  const publicUrl = `${window.location.origin}/ksiegarnia/${workspace?.slug}/${book.slug}`;
 
   const remove = async () => {
     if (!confirm(`Usunąć „${book.title}”? Przez 30 dni można go jeszcze przywrócić.`)) return;
@@ -146,6 +164,37 @@ export default function BookDetail() {
               </form>
             )}
             {workspace?.role === "owner" && <button className="danger" type="button" onClick={remove}>Usuń tytuł</button>}
+          </div>
+
+          <div className="card stack">
+            <h3>Okładka i strona publiczna</h3>
+            <div className="row" style={{ alignItems: "flex-start" }}>
+              {cover ? <img src={cover} alt={`Okładka: ${book.title}`} style={{ width: 110, aspectRatio: "2 / 3", objectFit: "cover", borderRadius: 6 }} />
+                : <div className="muted small" style={{ width: 110, aspectRatio: "2 / 3", border: "1px dashed var(--line)", borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center" }}>brak okładki</div>}
+              <div className="stack" style={{ flex: 1 }}>
+                {canEdit && <label className="small">Wgraj okładkę (JPG/PNG, najlepiej 1600×2560 px)
+                  <input type="file" accept="image/jpeg,image/png" onChange={(e) => uploadCover(e.target.files?.[0])} /></label>}
+                <span className="muted small">Okładka trafia na stronę książki i do pliku EPUB.</span>
+              </div>
+            </div>
+            {workspace?.role === "owner" ? (
+              <>
+                <label className="row" style={{ flexDirection: "row", color: "var(--text)" }}>
+                  <input type="checkbox" checked={book.public} onChange={(e) => save(undefined, { public: e.target.checked })} />
+                  Strona książki widoczna publicznie
+                </label>
+                {book.public && (
+                  <>
+                    <a href={publicUrl} target="_blank" rel="noopener noreferrer" className="small" style={{ wordBreak: "break-all" }}>{publicUrl}</a>
+                    <div className="row">
+                      <input style={{ flex: 1 }} value={slugDraft} onChange={(e) => setSlugDraft(e.target.value.toLowerCase())} aria-label="Adres strony" />
+                      <button className="ghost" type="button" disabled={slugDraft === book.slug} onClick={() => save(undefined, { slug: slugDraft })}>Zmień adres</button>
+                    </div>
+                    <span className="muted small">Strona pokazuje opis, autorów, linki do sklepów, wydania i produkty z motywem książki. Katalog: <a href={`/ksiegarnia/${workspace?.slug}`} target="_blank" rel="noopener noreferrer">/ksiegarnia/{workspace?.slug}</a></span>
+                  </>
+                )}
+              </>
+            ) : book.public && <a href={publicUrl} target="_blank" rel="noopener noreferrer" className="small">Strona publiczna książki</a>}
           </div>
         </div>
       )}

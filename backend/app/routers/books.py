@@ -5,7 +5,9 @@ from sqlalchemy.orm import Session
 from app.audit import audit
 from app.db import get_db
 from app.deps import require
+from app.http import slugify
 from app.models import Book, Membership, ResearchGate, Workspace, utcnow
+from app.security import role_can
 from app.schemas import BookImportIn, BookIn, BookOut, BookPatchIn
 
 router = APIRouter(prefix="/api/v1/workspaces/{ws}/books", tags=["books"])
@@ -74,6 +76,16 @@ def patch_book(book_id: str, body: BookPatchIn, m: Membership = Depends(require(
             gate.override_reason = reason
             db.add(gate)
             audit(db, "research.gate_overridden", m.user_id, m.workspace_id, target=b.id, reason=reason)
+    if "public" in changes and not role_can(m.role, "manage_distribution"):
+        raise HTTPException(403, "Stronę publiczną włącza właściciel")
+    if "slug" in changes or changes.get("public"):
+        slug = changes.get("slug") or b.slug or slugify(b.title)
+        base, n = slug, 2
+        while db.scalar(select(Book.id).where(Book.workspace_id == m.workspace_id, Book.slug == slug, Book.id != b.id)):
+            if "slug" in changes:
+                raise HTTPException(409, "Ten adres jest już zajęty przez inny tytuł")
+            slug, n = f"{base}-{n}", n + 1
+        changes["slug"] = slug
     for k, v in changes.items():
         setattr(b, k, v)
     audit(db, "book.updated", m.user_id, m.workspace_id, target=b.id, fields=sorted(changes))

@@ -120,6 +120,9 @@ class Book(Base):
     territories: Mapped[str] = mapped_column(String(200), default="world")
     # FR-META-07 (KDP rules): AI-generated text / images (incl. cover) / translation must be declared.
     ai_disclosure: Mapped[dict] = mapped_column(JSON, default=lambda: {"text": False, "images": False, "translation": False})
+    # Public book page /ksiegarnia/{workspace slug}/{slug}; off until the owner publishes it.
+    public: Mapped[bool] = mapped_column(Boolean, default=False)
+    slug: Mapped[str] = mapped_column(String(120), default="", index=True)
     created_by: Mapped[str] = mapped_column(ForeignKey("users.id"))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)  # soft delete, 30 days

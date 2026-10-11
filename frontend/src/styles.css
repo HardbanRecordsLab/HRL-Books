@@ -92,3 +92,7 @@ tr.click:hover td { background: var(--panel-2); }
   .grid[style*="minmax(200px"] { grid-template-columns: 1fr !important; }
   .grid[style*="minmax(200px"] > .card { position: static !important; }
 }
+@media (max-width: 640px) {
+  .book-hero { grid-template-columns: 1fr !important; justify-items: center; }
+  .book-hero > .stack { width: 100%; }
+}
