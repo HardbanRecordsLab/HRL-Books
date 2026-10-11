@@ -1,7 +1,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import { ApiError, api } from "../lib/api";
 
-type Catalog = { uid: string; label: string };
+type Catalog = { uid: string; label: string; singular: string };
 type GelatoProduct = { productUid: string; attributes: Record<string, string> };
 type Asset = { id: string; url: string; original_name: string; content_type: string };
 type Quote = { product: number; shipping: number; shipping_method: string; delivery_days: (number | null)[] };
@@ -60,8 +60,8 @@ export default function ProductsTab({ ws, bookId, bookTitle, canManage }: { ws: 
     setBusy("Pobieram produkty z Gelato…");
     api<GelatoProduct[]>(`/workspaces/${ws}/shop/catalogs/${catalog}/products`)
       .then(setOptions).catch((e) => setError(e.message)).finally(() => setBusy(""));
-    const label = catalogs.find((c) => c.uid === catalog)?.label || "";
-    if (!title) setTitle(`${label.replace(/y$/, "").replace(/i$/, "")} — ${bookTitle}`.slice(0, 120));
+    const name = catalogs.find((c) => c.uid === catalog)?.singular || "";
+    if (!title) setTitle(`${name} — ${bookTitle}`.slice(0, 120));
   }, [catalog]);
 
   useEffect(() => {

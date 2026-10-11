@@ -75,7 +75,7 @@ def _owner_emails(db: Session, ws_id: str) -> list[str]:
 
 @router.get("/api/v1/workspaces/{ws}/shop/catalogs")
 def catalogs(m: Membership = Depends(require("manage_shop"))):
-    return [{"uid": k, "label": v} for k, v in gi.GELATO_CATALOGS.items()]
+    return [{"uid": k, "label": v, "singular": gi.GELATO_SINGULAR.get(k, v)} for k, v in gi.GELATO_CATALOGS.items()]
 
 
 @router.get("/api/v1/workspaces/{ws}/shop/catalogs/{catalog}/products")

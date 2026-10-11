@@ -20,6 +20,14 @@ GELATO_CATALOGS = {
 }
 
 
+GELATO_SINGULAR = {
+    "t-shirts": "Koszulka", "hoodies": "Bluza z kapturem", "sweatshirts": "Bluza", "tote-bags": "Torba",
+    "mugs": "Kubek", "posters": "Plakat", "framed-posters": "Plakat w ramie", "canvas": "Obraz na płótnie",
+    "notebooks": "Notes", "calendars": "Kalendarz", "cards": "Kartka", "phone-cases": "Etui na telefon",
+    "soft-cover-photobooks": "Fotoksiążka", "hard-cover-photobooks": "Fotoksiążka",
+}
+
+
 class IntegrationError(Exception):
     pass
 
