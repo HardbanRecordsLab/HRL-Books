@@ -29,6 +29,12 @@ services:
     volumes:
       - hrl_books_files:/app/data
 
+  web:
+    build: ./frontend
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${WEB_PORT:-8128}:80"
+
 volumes:
   hrl_books_db:
   hrl_books_files:

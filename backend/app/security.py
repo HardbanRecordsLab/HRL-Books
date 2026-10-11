@@ -99,6 +99,7 @@ PERMISSIONS: dict[str, set[str]] = {
     "delete_book": {"owner"},
     "read_books": {"owner", "editor", "author", "reviewer"},
     "edit_metadata": {"owner", "editor"},
+    "edit_book": {"owner", "editor", "author"},
     "manage_distribution": {"owner"},
     "royalties": {"owner"},
 }

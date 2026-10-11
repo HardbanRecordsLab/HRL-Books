@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, HttpUrl
 
 Role = Literal["owner", "editor", "author", "reviewer"]
 
@@ -73,6 +73,32 @@ class BookIn(BaseModel):
     desc_short: str = Field(default="", max_length=2000)
 
 
+BookStatus = Literal["idea", "research", "writing", "editing", "preparation", "distribution", "published", "archived"]
+
+
+class StoreLink(BaseModel):
+    url: HttpUrl
+    channel: str = Field(default="", max_length=80)
+
+
+class BookPatchIn(BaseModel):
+    title: str | None = Field(default=None, min_length=1, max_length=500)
+    subtitle: str | None = Field(default=None, max_length=500)
+    language: str | None = Field(default=None, max_length=10)
+    status: BookStatus | None = None
+    desc_short: str | None = Field(default=None, max_length=2000)
+    store_links: list[StoreLink] | None = Field(default=None, max_length=50)
+
+
+class BookImportItem(BookIn):
+    status: BookStatus = "published"
+    store_links: list[StoreLink] = Field(default_factory=list, max_length=50)
+
+
+class BookImportIn(BaseModel):
+    books: list[BookImportItem] = Field(min_length=1, max_length=500)
+
+
 class BookOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     id: str
@@ -82,4 +108,12 @@ class BookOut(BaseModel):
     language: str
     status: str
     desc_short: str
+    store_links: list[dict]
     created_at: datetime
+
+
+class MemberOut(BaseModel):
+    user_id: str
+    email: str
+    display_name: str
+    role: Role

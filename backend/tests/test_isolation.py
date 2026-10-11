@@ -55,3 +55,28 @@ def test_soft_delete_hides_book(client):
     assert client.delete(f"/api/v1/workspaces/{ws}/books/{book}", headers=h).status_code == 204
     assert client.get(f"/api/v1/workspaces/{ws}/books/{book}", headers=h).status_code == 404
     assert client.get(f"/api/v1/workspaces/{ws}/books", headers=h).json() == []
+
+
+def test_import_published_books_with_links(client):
+    ws, owner = make_workspace(client, "hrl-books", "owner@example.com")
+    h = auth(owner["access_token"])
+    r = client.post(f"/api/v1/workspaces/{ws}/books/import", headers=h, json={"books": [
+        {"title": "Cyfrowy Zen", "store_links": [{"url": "https://www.amazon.pl/dp/B000TEST"}]},
+        {"title": "EFT po toksycznym związku"},
+    ]})
+    assert r.status_code == 201 and r.json() == {"imported": 2}
+    books = client.get(f"/api/v1/workspaces/{ws}/books", headers=h).json()
+    assert {b["status"] for b in books} == {"published"}
+    zen = next(b for b in books if b["title"] == "Cyfrowy Zen")
+    assert zen["store_links"][0]["url"].startswith("https://www.amazon.pl/")
+
+
+def test_patch_book_and_members(client):
+    ws, owner = make_workspace(client, "hrl-books", "owner@example.com")
+    h = auth(owner["access_token"])
+    book = _book(client, ws, owner)
+    r = client.patch(f"/api/v1/workspaces/{ws}/books/{book}", headers=h, json={"status": "writing", "subtitle": "Poradnik"})
+    assert r.status_code == 200 and r.json()["status"] == "writing" and r.json()["subtitle"] == "Poradnik"
+    assert client.patch(f"/api/v1/workspaces/{ws}/books/{book}", headers=h, json={"status": "nonsense"}).status_code == 422
+    members = client.get(f"/api/v1/workspaces/{ws}/members", headers=h).json()
+    assert [(m["email"], m["role"]) for m in members] == [("owner@example.com", "owner")]

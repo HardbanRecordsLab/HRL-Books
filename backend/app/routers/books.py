@@ -6,7 +6,7 @@ from app.audit import audit
 from app.db import get_db
 from app.deps import require
 from app.models import Book, Membership, Workspace, utcnow
-from app.schemas import BookIn, BookOut
+from app.schemas import BookImportIn, BookIn, BookOut, BookPatchIn
 
 router = APIRouter(prefix="/api/v1/workspaces/{ws}/books", tags=["books"])
 
@@ -36,6 +36,34 @@ def create_book(body: BookIn, m: Membership = Depends(require("create_book")), d
     db.add(b)
     db.flush()
     audit(db, "book.created", m.user_id, ws.id, target=b.id)
+    db.commit()
+    return b
+
+
+@router.post("/import", status_code=201)
+def import_books(body: BookImportIn, m: Membership = Depends(require("create_book")), db: Session = Depends(get_db)):
+    """Bring already-published titles into the platform, with their store links."""
+    ws = db.get(Workspace, m.workspace_id)
+    count = db.scalar(select(func.count()).select_from(Book)
+                      .where(Book.workspace_id == ws.id, Book.deleted_at.is_(None)))
+    if count + len(body.books) > int(ws.limits.get("max_titles", 50)):
+        raise HTTPException(403, "Import przekroczyłby limit tytułów w tym workspace'ie")
+    for item in body.books:
+        data = item.model_dump(mode="json")
+        db.add(Book(workspace_id=ws.id, created_by=m.user_id, **data))
+    audit(db, "book.imported", m.user_id, ws.id, count=len(body.books))
+    db.commit()
+    return {"imported": len(body.books)}
+
+
+@router.patch("/{book_id}", response_model=BookOut)
+def patch_book(book_id: str, body: BookPatchIn, m: Membership = Depends(require("edit_book")),
+               db: Session = Depends(get_db)):
+    b = _book(db, m.workspace_id, book_id)
+    changes = body.model_dump(mode="json", exclude_none=True)
+    for k, v in changes.items():
+        setattr(b, k, v)
+    audit(db, "book.updated", m.user_id, m.workspace_id, target=b.id, fields=sorted(changes))
     db.commit()
     return b
 

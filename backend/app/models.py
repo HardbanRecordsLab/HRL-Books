@@ -105,6 +105,8 @@ class Book(Base):
     language: Mapped[str] = mapped_column(String(10), default="pl")
     status: Mapped[str] = mapped_column(String(20), default="idea")
     desc_short: Mapped[str] = mapped_column(Text, default="")
+    # Links to the book in stores (also filled by the import of already-published titles).
+    store_links: Mapped[list] = mapped_column(JSON, default=list)
     created_by: Mapped[str] = mapped_column(ForeignKey("users.id"))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)  # soft delete, 30 days

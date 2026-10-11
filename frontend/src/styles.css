@@ -1,0 +1,80 @@
+:root {
+  --bg: #0d0d10;
+  --panel: #16161b;
+  --panel-2: #1d1d24;
+  --line: #2a2a33;
+  --text: #ecebe7;
+  --muted: #9a98a3;
+  --gold: #c8a24a;
+  --gold-2: #e3c06b;
+  --red: #e0675d;
+  --green: #6cc28a;
+  --radius: 10px;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body, #root { margin: 0; min-height: 100%; }
+body { background: var(--bg); color: var(--text); font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+a { color: var(--gold-2); text-decoration: none; }
+a:hover { text-decoration: underline; }
+h1, h2, h3 { font-family: Georgia, "Times New Roman", serif; font-weight: 600; margin: 0 0 .6rem; }
+h1 { font-size: 1.7rem; } h2 { font-size: 1.25rem; } h3 { font-size: 1.05rem; }
+.muted { color: var(--muted); }
+.small { font-size: .85rem; }
+
+.shell { display: grid; grid-template-columns: 230px 1fr; min-height: 100vh; }
+.side { background: var(--panel); border-right: 1px solid var(--line); padding: 1.2rem 1rem; display: flex; flex-direction: column; gap: 1rem; }
+.brand { font-family: Georgia, serif; font-size: 1.3rem; color: var(--gold); }
+.brand span { color: var(--text); }
+.nav { display: flex; flex-direction: column; gap: .2rem; }
+.nav a { color: var(--text); padding: .45rem .6rem; border-radius: 8px; }
+.nav a.active, .nav a:hover { background: var(--panel-2); text-decoration: none; }
+.main { padding: 1.6rem 2rem; max-width: 1100px; width: 100%; }
+@media (max-width: 760px) {
+  .shell { grid-template-columns: 1fr; }
+  .side { border-right: 0; border-bottom: 1px solid var(--line); }
+  .main { padding: 1.2rem 1rem; }
+}
+
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 1.1rem 1.2rem; }
+.grid { display: grid; gap: 1rem; }
+.grid-2 { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+.row { display: flex; gap: .6rem; align-items: center; flex-wrap: wrap; }
+.spread { justify-content: space-between; }
+.stack { display: flex; flex-direction: column; gap: .7rem; }
+
+label { display: flex; flex-direction: column; gap: .3rem; font-size: .88rem; color: var(--muted); }
+input, select, textarea {
+  background: var(--bg); color: var(--text); border: 1px solid var(--line); border-radius: 8px;
+  padding: .55rem .7rem; font: inherit;
+}
+input:focus, select:focus, textarea:focus { outline: 2px solid var(--gold); outline-offset: 0; border-color: transparent; }
+textarea { min-height: 90px; resize: vertical; }
+button, .btn {
+  background: var(--gold); color: #141414; border: 0; border-radius: 8px; padding: .55rem 1rem;
+  font: inherit; font-weight: 600; cursor: pointer; display: inline-block;
+}
+button:hover, .btn:hover { background: var(--gold-2); text-decoration: none; }
+button.ghost, .btn.ghost { background: transparent; color: var(--text); border: 1px solid var(--line); font-weight: 500; }
+button.ghost:hover { background: var(--panel-2); }
+button.danger { background: transparent; color: var(--red); border: 1px solid var(--red); }
+button:disabled { opacity: .5; cursor: default; }
+
+.error { color: var(--red); font-size: .9rem; }
+.ok { color: var(--green); font-size: .9rem; }
+.pill { display: inline-block; padding: .1rem .55rem; border-radius: 999px; font-size: .78rem; border: 1px solid var(--line); color: var(--muted); }
+.pill.published { color: var(--green); border-color: var(--green); }
+
+table { width: 100%; border-collapse: collapse; }
+th, td { text-align: left; padding: .6rem .5rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { color: var(--muted); font-weight: 500; font-size: .85rem; }
+tr.click { cursor: pointer; }
+tr.click:hover td { background: var(--panel-2); }
+
+.tabs { display: flex; gap: .2rem; border-bottom: 1px solid var(--line); margin: 1rem 0; flex-wrap: wrap; }
+.tabs button { background: transparent; color: var(--muted); border-radius: 0; border-bottom: 2px solid transparent; font-weight: 500; }
+.tabs button.on { color: var(--text); border-bottom-color: var(--gold); }
+
+.center { min-height: 100vh; display: grid; place-items: center; padding: 1rem; }
+.auth { width: 100%; max-width: 380px; }
+.empty { text-align: center; padding: 2rem 1rem; color: var(--muted); }

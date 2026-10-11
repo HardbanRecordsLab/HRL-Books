@@ -7,7 +7,7 @@ from app.db import get_db
 from app.deps import current_user, membership, require
 from app.invitations import create_invitation
 from app.models import Membership, User, Workspace
-from app.schemas import InviteIn, MyWorkspaceOut, WorkspaceOut, WorkspacePatchIn
+from app.schemas import InviteIn, MemberOut, MyWorkspaceOut, WorkspaceOut, WorkspacePatchIn
 
 router = APIRouter(prefix="/api/v1/workspaces", tags=["workspaces"])
 
@@ -22,6 +22,13 @@ def my_workspaces(user: User = Depends(current_user), db: Session = Depends(get_
 @router.get("/{ws}", response_model=WorkspaceOut)
 def get_workspace(m: Membership = Depends(membership), db: Session = Depends(get_db)):
     return db.get(Workspace, m.workspace_id)
+
+
+@router.get("/{ws}/members", response_model=list[MemberOut])
+def members(m: Membership = Depends(membership), db: Session = Depends(get_db)):
+    rows = db.execute(select(User, Membership.role).join(Membership, Membership.user_id == User.id)
+                      .where(Membership.workspace_id == m.workspace_id).order_by(User.email)).all()
+    return [MemberOut(user_id=u.id, email=u.email, display_name=u.display_name, role=role) for u, role in rows]
 
 
 @router.patch("/{ws}", response_model=WorkspaceOut)
