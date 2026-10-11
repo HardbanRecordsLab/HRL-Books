@@ -2,8 +2,11 @@
 import csv
 import io
 import json
+import re
+import unicodedata
 import zipfile
 from datetime import datetime
+from urllib.parse import quote
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
@@ -182,6 +185,9 @@ def package(book_id: str, channel: str, m: Membership = Depends(require("manage_
     data = _package(db, db.get(Workspace, m.workspace_id), book, channel)
     audit(db, "package.exported", m.user_id, m.workspace_id, target=f"{book.id}:{channel}")
     db.commit()
-    safe = "".join(c if c.isalnum() else "-" for c in book.title.lower())[:50].strip("-") or "ksiazka"
-    return StreamingResponse(io.BytesIO(data), media_type="application/zip",
-                             headers={"Content-Disposition": f'attachment; filename="{safe}-{channel}.zip"'})
+    # HTTP headers are latin-1: ASCII fallback name + RFC 5987 UTF-8 name for Polish titles.
+    folded = unicodedata.normalize("NFKD", book.title.lower().replace("ł", "l")).encode("ascii", "ignore").decode()
+    ascii_name = (re.sub(r"-+", "-", "".join(c if c.isalnum() else "-" for c in folded))[:50].strip("-") or "ksiazka") + f"-{channel}.zip"
+    utf8_name = quote(f"{book.title[:80]} - {CHANNELS[channel]['name']}.zip")
+    return StreamingResponse(io.BytesIO(data), media_type="application/zip", headers={
+        "Content-Disposition": f"attachment; filename=\"{ascii_name}\"; filename*=UTF-8''{utf8_name}"})

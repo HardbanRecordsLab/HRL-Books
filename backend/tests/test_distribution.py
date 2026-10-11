@@ -73,3 +73,14 @@ def test_distribution_permissions_and_isolation(client):
     hb = auth(owner_b["access_token"])
     assert client.put(f"/api/v1/workspaces/{ws_b}/books/{book}/listings/kdp", headers=hb, json={"status": "sent"}).status_code == 404
     assert client.get(f"/api/v1/workspaces/{ws_b}/books/{book}/package/kdp", headers=hb).status_code == 404
+
+
+def test_package_with_polish_title(client):
+    ws, owner = make_workspace(client, "hrl-books", "owner@example.com")
+    h = auth(owner["access_token"])
+    base = f"/api/v1/workspaces/{ws}"
+    book = client.post(f"{base}/books", headers=h, json={"title": "Żółć, łzy i gęś — poradnik"}).json()["id"]
+    r = client.get(f"{base}/books/{book}/package/kdp", headers=h)
+    assert r.status_code == 200
+    cd = r.headers["content-disposition"]
+    assert 'filename="zolc-lzy-i-ges-poradnik-kdp.zip"' in cd and "filename*=UTF-8''" in cd
