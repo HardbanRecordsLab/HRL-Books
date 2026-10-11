@@ -81,7 +81,8 @@ def patch_book(book_id: str, body: BookPatchIn, m: Membership = Depends(require(
     if "slug" in changes or changes.get("public"):
         slug = changes.get("slug") or b.slug or slugify(b.title)
         base, n = slug, 2
-        while db.scalar(select(Book.id).where(Book.workspace_id == m.workspace_id, Book.slug == slug, Book.id != b.id)):
+        while db.scalar(select(Book.id).where(Book.workspace_id == m.workspace_id, Book.slug == slug, Book.id != b.id,
+                                         Book.deleted_at.is_(None))):
             if "slug" in changes:
                 raise HTTPException(409, "Ten adres jest już zajęty przez inny tytuł")
             slug, n = f"{base}-{n}", n + 1

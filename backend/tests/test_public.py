@@ -33,6 +33,9 @@ def test_public_page_lifecycle(client):
     assert client.get("/api/v1/public/w/wydawnictwo/rodzic-bez-poczucia-winy").status_code == 404
     client.delete(f"{base}/books/{other}", headers=h)
     assert client.get("/api/v1/public/w/wydawnictwo/rodzic-bez-poczucia-winy-2").status_code == 404
+    third = client.post(f"{base}/books", headers=h, json={"title": "Rodzic bez poczucia winy"}).json()["id"]
+    client.delete(f"{base}/books/{book}", headers=h)  # a deleted title no longer reserves its address
+    assert client.patch(f"{base}/books/{third}", headers=h, json={"public": True}).json()["slug"] == "rodzic-bez-poczucia-winy"
 
 
 def test_only_owner_publishes(client):

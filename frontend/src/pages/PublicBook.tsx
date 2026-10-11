@@ -109,8 +109,8 @@ export function PublicBookPage() {
               </div>
             )}
             <div className="muted small">
-              {b.editions.map((e) => e.format).join(" · ")}{release && ` · premiera ${new Date(release).toLocaleDateString("pl-PL")}`}
-              {b.language && ` · język: ${b.language === "pl" ? "polski" : b.language === "en" ? "angielski" : b.language}`}
+              {[...b.editions.map((e) => e.format), release && `premiera ${new Date(release).toLocaleDateString("pl-PL")}`,
+                b.language && `język: ${b.language === "pl" ? "polski" : b.language === "en" ? "angielski" : b.language}`].filter(Boolean).join(" · ")}
             </div>
           </div>
         </div>
