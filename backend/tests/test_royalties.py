@@ -66,9 +66,9 @@ def test_kdp_xlsx_import_matching_duplicates_and_summary(client):
 def test_polish_csv_needs_period_and_mapping(client):
     ws, h, base, b1, b2 = _setup(client)
     csv_text = "Tytuł;Sztuk;Kwota\nCisza po burzy;5;\"12,50\"\n".encode("cp1250")
-    r = client.post(f"{base}/royalties/import", headers=h, data={"channel": "virtualo"}, files={"file": ("raport.csv", csv_text)})
+    r = client.post(f"{base}/royalties/import", headers=h, data={"channel": "empik"}, files={"file": ("raport.csv", csv_text)})
     assert r.status_code == 422 and "miesiąc" in r.json()["detail"]["message"]
-    r = client.post(f"{base}/royalties/import", headers=h, data={"channel": "virtualo", "period": "2026-08"}, files={"file": ("raport.csv", csv_text)})
+    r = client.post(f"{base}/royalties/import", headers=h, data={"channel": "empik", "period": "2026-08"}, files={"file": ("raport.csv", csv_text)})
     assert r.json()["rows"] == 1
     assert client.get(f"{base}/royalties", headers=h).json()["by_book"][0]["amounts"] == {"PLN": 12.5}
 

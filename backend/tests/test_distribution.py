@@ -20,9 +20,9 @@ def test_board_shows_imported_store_links_as_published(client):
     board = client.get(f"{base}/distribution", headers=h).json()
     zen = next(r for r in board["rows"] if r["title"] == "Cyfrowy Zen")
     assert zen["cells"]["kdp"]["status"] == "published"
-    assert zen["cells"]["virtualo"]["status"] == "published"
+    assert zen["cells"]["empik"]["status"] == "published"
     assert zen["cells"]["kobo"]["status"] == "not_ready"
-    assert [c["key"] for c in board["channels"]] == ["kdp", "google_play", "kobo", "d2d", "virtualo"]
+    assert [c["key"] for c in board["channels"]] == ["kdp", "google_play", "kobo", "d2d", "empik"]
 
 
 def test_listing_status_flow_and_checklist(client):

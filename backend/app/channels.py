@@ -69,17 +69,19 @@ CHANNELS: dict[str, dict] = {
             "Opublikuj i zmień status wpisu na „Wysłane”.",
         ],
     },
-    "virtualo": {
-        "name": "Virtualo",
-        "panel_url": "https://virtualo.pl",
-        "formats": ["ebook_epub", "ebook_pdf"],
+    "empik": {
+        "name": "Empik Selfpublishing",
+        "panel_url": "https://selfpublishing.empik.com",
+        "formats": ["ebook_epub", "ebook_pdf", "paperback", "audiobook"],
         "limits": {},
-        "url_hosts": ["virtualo.", "empik.", "legimi.", "woblink.", "allegro."],
-        "note": "Polski dystrybutor: Empik, Empik Go, Legimi, Woblink, Allegro i inne.",
+        "url_hosts": ["empik.", "virtualo."],
+        "note": "Jedno konto: empik.com, aplikacja Empik Go i virtualo.pl (e-book, audiobook, druk). Bez opłat za dołączenie.",
         "steps": [
-            "Prześlij Virtualo plik wydania, okładkę i metadane z pakietu (zgodnie z umową z dystrybutorem).",
-            "Potwierdź ceny i sklepy docelowe.",
-            "Po przyjęciu zmień status wpisu na „Wysłane”.",
+            "Zaloguj się na selfpublishing.empik.com (rejestracja: e-mail, telefon, polska rezydencja podatkowa).",
+            "Dodaj książkę i wklej metadane z pakietu: tytuł, autor, opis, kategorie.",
+            "Wgraj okładkę i plik ksiazka.epub z pakietu (nie korzystaj z ich konwersji — EPUB z HRL Books jest zwalidowany).",
+            "Ustaw cenę. Jeśli Empik proponuje własny ISBN — jako wydawca figurowałby Empik; poczekaj na własną pulę.",
+            "Opublikuj i zmień status wpisu na „Wysłane”; po pojawieniu się w sklepie wklej link.",
         ],
     },
 }

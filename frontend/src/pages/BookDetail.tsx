@@ -26,7 +26,7 @@ function channelOf(url: string) {
   if (host.includes("empik")) return "Empik";
   if (host.includes("legimi")) return "Legimi";
   if (host.includes("woblink")) return "Woblink";
-  if (host.includes("virtualo")) return "Virtualo";
+  if (host.includes("virtualo")) return "Virtualo (Empik)";
   if (host.includes("lulu")) return "Lulu";
   return host;
 }

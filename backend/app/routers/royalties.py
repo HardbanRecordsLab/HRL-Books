@@ -21,7 +21,7 @@ from app.royalties import FIELDS, ReportError, normalize, read_table
 
 router = APIRouter(prefix="/api/v1/workspaces/{ws}/royalties", tags=["royalties"])
 CHANNEL_LABELS = {k: v["name"] for k, v in CHANNELS.items()} | {
-    "empik": "Empik Go", "legimi": "Legimi", "woblink": "Woblink", "apple": "Apple Books", "publio": "Publio",
+    "legimi": "Legimi", "woblink": "Woblink", "apple": "Apple Books", "publio": "Publio",
     "audioteka": "Audioteka", "storytel": "Storytel", "own_shop": "Sprzedaż własna", "other": "Inne"}
 
 
