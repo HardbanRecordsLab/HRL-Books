@@ -4,7 +4,7 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
-RUN useradd --uid 10001 --create-home books && chown -R books /app
+RUN useradd --uid 10001 --create-home books && mkdir -p /app/data/files && chown -R books /app
 USER books
 EXPOSE 8000
 # Migrations run on start, so a deploy is: git pull && docker compose up -d --build

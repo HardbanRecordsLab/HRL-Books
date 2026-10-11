@@ -81,6 +81,7 @@ export default function Books() {
           {canCreate && <button onClick={() => setMode(mode === "new" ? "" : "new")}>Nowy tytuł</button>}
           {canCreate && <button className="ghost" onClick={() => setMode(mode === "import" ? "" : "import")}>Import wydanych</button>}
           {workspace.role !== "reviewer" && <Link className="btn ghost" to={`/w/${ws}/dystrybucja`}>Dystrybucja</Link>}
+          {workspace.role === "owner" && <Link className="btn ghost" to={`/w/${ws}/sklep`}>Sklep</Link>}
           {workspace.role === "owner" && <Link className="btn ghost" to={`/w/${ws}/ustawienia`}>Ustawienia</Link>}
         </div>
       </div>

@@ -103,6 +103,8 @@ PERMISSIONS: dict[str, set[str]] = {
     "manage_distribution": {"owner"},
     "read_distribution": {"owner", "editor", "author"},
     "royalties": {"owner"},
+    "manage_shop": {"owner"},
+    "upload_files": {"owner", "editor", "author"},
 }
 
 

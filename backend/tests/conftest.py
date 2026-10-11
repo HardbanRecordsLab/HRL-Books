@@ -4,6 +4,9 @@ import re
 os.environ.setdefault("DATABASE_URL", os.environ.get("TEST_DATABASE_URL", "sqlite:///./test.db"))
 os.environ.setdefault("JWT_SECRET", "test-secret-0123456789-0123456789-abcdef")
 os.environ.pop("SMTP_HOST", None)
+import tempfile  # noqa: E402
+os.environ.setdefault("FILES_DIR", tempfile.mkdtemp(prefix="hrlb-files-"))
+os.environ.setdefault("STRIPE_WEBHOOK_SECRET", "whsec_test_secret")
 
 import pytest  # noqa: E402
 from fastapi.testclient import TestClient  # noqa: E402

@@ -186,3 +186,62 @@ class Listing(Base):
     sent_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     published_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class Asset(Base):
+    """An uploaded file (print design, cover, edition file). Served publicly only via an unguessable token,
+    because the print partner (Gelato) must fetch print files by URL."""
+    __tablename__ = "assets"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_id)
+    workspace_id: Mapped[str] = mapped_column(ForeignKey("workspaces.id", ondelete="CASCADE"), index=True)
+    book_id: Mapped[str | None] = mapped_column(ForeignKey("books.id", ondelete="SET NULL"), nullable=True, index=True)
+    kind: Mapped[str] = mapped_column(String(20), default="design")
+    original_name: Mapped[str] = mapped_column(String(300), default="")
+    content_type: Mapped[str] = mapped_column(String(100))
+    path: Mapped[str] = mapped_column(String(500))
+    size: Mapped[int] = mapped_column(Integer)
+    checksum: Mapped[str] = mapped_column(String(64))
+    public_token: Mapped[str] = mapped_column(String(64), unique=True, index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class Product(Base):
+    """A print-on-demand product sold to readers (Gelato). Price is the final price paid by the customer, shipping included."""
+    __tablename__ = "products"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_id)
+    workspace_id: Mapped[str] = mapped_column(ForeignKey("workspaces.id", ondelete="CASCADE"), index=True)
+    book_id: Mapped[str | None] = mapped_column(ForeignKey("books.id", ondelete="SET NULL"), nullable=True, index=True)
+    title: Mapped[str] = mapped_column(String(300))
+    description: Mapped[str] = mapped_column(Text, default="")
+    gelato_catalog: Mapped[str] = mapped_column(String(80))
+    gelato_product_uid: Mapped[str] = mapped_column(String(300))
+    design_asset_id: Mapped[str] = mapped_column(ForeignKey("assets.id"))
+    price_amount: Mapped[int] = mapped_column(Integer)  # in grosze (PLN cents), shipping included
+    currency: Mapped[str] = mapped_column(String(3), default="PLN")
+    active: Mapped[bool] = mapped_column(Boolean, default=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+ORDER_STATUSES = ("pending_payment", "paid", "submitted", "in_production", "shipped", "delivered", "canceled", "failed")
+
+
+class Order(Base):
+    __tablename__ = "orders"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_id)
+    workspace_id: Mapped[str] = mapped_column(ForeignKey("workspaces.id", ondelete="CASCADE"), index=True)
+    product_id: Mapped[str] = mapped_column(ForeignKey("products.id"), index=True)
+    quantity: Mapped[int] = mapped_column(Integer, default=1)
+    status: Mapped[str] = mapped_column(String(20), default="pending_payment")
+    amount_total: Mapped[int] = mapped_column(Integer)
+    currency: Mapped[str] = mapped_column(String(3), default="PLN")
+    customer_email: Mapped[str] = mapped_column(String(320), default="")
+    customer_name: Mapped[str] = mapped_column(String(300), default="")
+    shipping: Mapped[dict] = mapped_column(JSON, default=dict)
+    stripe_session_id: Mapped[str] = mapped_column(String(200), default="", index=True)
+    stripe_payment_intent: Mapped[str] = mapped_column(String(200), default="")
+    gelato_order_id: Mapped[str] = mapped_column(String(100), default="")
+    gelato_status: Mapped[str] = mapped_column(String(50), default="")
+    tracking: Mapped[list] = mapped_column(JSON, default=list)
+    error: Mapped[str] = mapped_column(Text, default="")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)

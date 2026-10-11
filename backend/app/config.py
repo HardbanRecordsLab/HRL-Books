@@ -25,6 +25,13 @@ class Settings(BaseSettings):
     SMTP_PASSWORD: str | None = None
     SENDER_EMAIL: str = "no-reply@hardbanrecordslab.online"
 
+    FILES_DIR: str = "/app/data/files"
+    MAX_UPLOAD_MB: int = 45
+    GELATO_API_KEY: str | None = None
+    STRIPE_SECRET_KEY: str | None = None
+    STRIPE_WEBHOOK_SECRET: str | None = None
+    SHOP_COUNTRIES: str = "PL,DE,CZ,SK,LT,AT,NL,BE,FR,IT,ES,IE,DK,SE,FI,PT,GB,US"
+
     @field_validator("JWT_SECRET")
     @classmethod
     def _strong_secret(cls, v: str) -> str:

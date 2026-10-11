@@ -8,6 +8,8 @@ import BookDetail from "./pages/BookDetail";
 import Settings from "./pages/Settings";
 import Admin from "./pages/Admin";
 import Distribution from "./pages/Distribution";
+import Shop from "./pages/Shop";
+import { PublicProductPage, ThankYouPage } from "./pages/PublicShop";
 
 type Session = { me: Me; workspaces: Workspace[]; reload: () => Promise<void> };
 const SessionCtx = createContext<Session | null>(null);
@@ -63,6 +65,7 @@ function Shell() {
             <Route path="w/:ws/ksiazki/:id" element={<BookDetail />} />
             <Route path="w/:ws/ustawienia" element={<Settings />} />
             <Route path="w/:ws/dystrybucja" element={<Distribution />} />
+            <Route path="w/:ws/sklep" element={<Shop />} />
             <Route path="admin" element={session.me.is_platform_admin ? <Admin /> : <Navigate to="/" />} />
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
@@ -111,6 +114,8 @@ export default function App() {
     <Routes>
       <Route path="/logowanie" element={<Login />} />
       <Route path="/rejestracja" element={<Register />} />
+      <Route path="/sklep/dziekujemy" element={<ThankYouPage />} />
+      <Route path="/sklep/:id" element={<PublicProductPage />} />
       <Route path="/*" element={<RequireAuth />} />
     </Routes>
   );
