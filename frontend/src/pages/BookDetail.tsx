@@ -2,6 +2,7 @@ import { FormEvent, useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useWorkspace } from "../App";
 import { ApiError, api, Book, STATUS_LABELS } from "../lib/api";
+import MetadataTab from "./MetadataTab";
 
 type StoreLink = { url: string; channel?: string };
 type BookFull = Book & { store_links: StoreLink[] };
@@ -140,7 +141,11 @@ export default function BookDetail() {
         </div>
       )}
 
-      {tab !== "Przegląd" && (
+      {tab === "Metadane" && (
+        <MetadataTab base={`/workspaces/${ws}/books/${id}`} canEdit={["owner", "editor"].includes(workspace?.role || "")} />
+      )}
+
+      {tab !== "Przegląd" && tab !== "Metadane" && (
         <div className="card empty">
           <h3>{tab}</h3>
           <p>{COMING[tab]}</p>

@@ -38,7 +38,7 @@ def patch_workspace(body: WorkspacePatchIn, m: Membership = Depends(require("man
     changes = body.model_dump(exclude_none=True)
     for k, v in changes.items():
         setattr(ws, k, v)
-    audit(db, "workspace.updated", m.user_id, ws.id, **changes)
+    audit(db, "workspace.updated", m.user_id, ws.id, fields=sorted(changes))
     db.commit()
     return ws
 

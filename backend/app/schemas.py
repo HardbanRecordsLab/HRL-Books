@@ -43,6 +43,7 @@ class WorkspaceOut(BaseModel):
     ai_enabled: bool
     research_gate_mode: str
     status: str
+    identity_rules: list[dict] = []
 
 
 class MyWorkspaceOut(WorkspaceOut):
@@ -55,8 +56,14 @@ class WorkspaceCreateIn(BaseModel):
     owner_email: EmailStr
 
 
+class IdentityRule(BaseModel):
+    canonical: str = Field(min_length=2, max_length=200)
+    forbidden: list[str] = Field(default_factory=list, max_length=20)
+
+
 class WorkspacePatchIn(BaseModel):
     name: str | None = Field(default=None, min_length=2, max_length=200)
+    identity_rules: list[IdentityRule] | None = Field(default=None, max_length=20)
     ai_enabled: bool | None = None
     research_gate_mode: Literal["soft", "hard"] | None = None
 
@@ -117,3 +124,85 @@ class MemberOut(BaseModel):
     email: str
     display_name: str
     role: Role
+
+
+ContributorRole = Literal["author", "editor", "translator", "cover_designer", "illustrator", "narrator"]
+EditionFormat = Literal["ebook_epub", "ebook_pdf", "paperback", "hardcover", "audiobook"]
+
+
+class PersonIn(BaseModel):
+    display_name: str = Field(min_length=2, max_length=200)
+    bio_short: str = Field(default="", max_length=1000)
+    bio_long: str = Field(default="", max_length=5000)
+
+
+class PersonOut(PersonIn):
+    model_config = ConfigDict(from_attributes=True)
+    id: str
+
+
+class ContributorIn(BaseModel):
+    person_id: str
+    role: ContributorRole
+
+
+class ContributorOut(BaseModel):
+    person_id: str
+    display_name: str
+    role: str
+    position: int
+
+
+class AiDisclosure(BaseModel):
+    text: bool = False
+    images: bool = False
+    translation: bool = False
+
+
+class MetadataIn(BaseModel):
+    desc_long: str | None = Field(default=None, max_length=20000)
+    keywords: list[str] | None = Field(default=None, max_length=50)
+    categories: list[str] | None = Field(default=None, max_length=20)
+    audience: str | None = Field(default=None, max_length=200)
+    series_name: str | None = Field(default=None, max_length=300)
+    series_volume: int | None = Field(default=None, ge=1, le=999)
+    copyright_holder: str | None = Field(default=None, max_length=300)
+    copyright_year: int | None = Field(default=None, ge=1900, le=2100)
+    territories: str | None = Field(default=None, max_length=200)
+    ai_disclosure: AiDisclosure | None = None
+    contributors: list[ContributorIn] | None = Field(default=None, max_length=30)
+
+
+class MetadataOut(BaseModel):
+    desc_long: str
+    keywords: list[str]
+    categories: list[str]
+    audience: str
+    series_name: str
+    series_volume: int | None
+    copyright_holder: str
+    copyright_year: int | None
+    territories: str
+    ai_disclosure: dict
+    contributors: list[ContributorOut]
+
+
+class Price(BaseModel):
+    market: str = Field(min_length=2, max_length=5)
+    currency: str = Field(min_length=3, max_length=3)
+    amount: float = Field(ge=0, le=100000)
+
+
+class EditionIn(BaseModel):
+    format: EditionFormat
+    isbn: str = Field(default="", max_length=20)
+    release_date: str = Field(default="", pattern=r"^(\d{4}-\d{2}-\d{2})?$")
+    pages: int | None = Field(default=None, ge=1, le=10000)
+    drm: bool = False
+    prices: list[Price] = Field(default_factory=list, max_length=30)
+
+
+class EditionOut(EditionIn):
+    model_config = ConfigDict(from_attributes=True)
+    id: str
+    book_id: str
