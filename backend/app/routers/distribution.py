@@ -2,11 +2,8 @@
 import csv
 import io
 import json
-import re
-import unicodedata
 import zipfile
 from datetime import datetime
-from urllib.parse import quote
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
@@ -17,6 +14,8 @@ from app.audit import audit
 from app.channels import CHANNELS, STATUS_LABELS, channel_from_url, public_profile
 from app.checks import run_checks
 from app.db import get_db
+from app.epub import build_epub
+from app.http import attachment
 from app.deps import require
 from app.models import Book, BookContributor, Edition, Listing, Membership, Person, Workspace, utcnow
 from app.schemas import ListingIn, ListingOut
@@ -170,12 +169,17 @@ def _package(db: Session, ws: Workspace, book: Book, key: str) -> bytes:
             w.writerow([f"wydanie {e['format']}", f"ISBN {e['isbn'] or '—'}; premiera {e['release_date'] or '—'}; {prices}"])
         z.writestr("metadane.csv", "﻿" + rows.getvalue())
         z.writestr("opis.txt", book.desc_long or book.desc_short)
+        if "ebook_epub" in ch["formats"]:
+            try:
+                z.writestr("ksiazka.epub", build_epub(db, book), compress_type=zipfile.ZIP_STORED)
+            except ValueError:
+                pass  # no manuscript text yet: package with metadata only
         steps = "\n".join(f"{i + 1}. {s}" for i, s in enumerate(ch["steps"]))
         ai = book.ai_disclosure or {}
         ai_line = ("Treści AI do zadeklarowania: " + ", ".join(k for k, v in ai.items() if v)) if any(ai.values()) else "Brak treści wygenerowanych przez AI do zadeklarowania."
         z.writestr("INSTRUKCJA.txt",
                    f"{ch['name']} — {book.title}\nPanel: {ch['panel_url']}\n\n{steps}\n\n{ai_line}\n\n"
-                   f"Pliki wydania i okładkę dołącz z karty książki.\nWygenerowano w HRL Books {datetime.now():%Y-%m-%d %H:%M}.\n")
+                   f"Plik ksiazka.epub jest w paczce, jeśli rękopis ma tekst. Okładkę dołącz z karty książki.\nWygenerowano w HRL Books {datetime.now():%Y-%m-%d %H:%M}.\n")
     return buf.getvalue()
 
 
@@ -187,9 +191,5 @@ def package(book_id: str, channel: str, m: Membership = Depends(require("manage_
     data = _package(db, db.get(Workspace, m.workspace_id), book, channel)
     audit(db, "package.exported", m.user_id, m.workspace_id, target=f"{book.id}:{channel}")
     db.commit()
-    # HTTP headers are latin-1: ASCII fallback name + RFC 5987 UTF-8 name for Polish titles.
-    folded = unicodedata.normalize("NFKD", book.title.lower().replace("ł", "l")).encode("ascii", "ignore").decode()
-    ascii_name = (re.sub(r"-+", "-", "".join(c if c.isalnum() else "-" for c in folded))[:50].strip("-") or "ksiazka") + f"-{channel}.zip"
-    utf8_name = quote(f"{book.title[:80]} - {CHANNELS[channel]['name']}.zip")
     return StreamingResponse(io.BytesIO(data), media_type="application/zip", headers={
-        "Content-Disposition": f"attachment; filename=\"{ascii_name}\"; filename*=UTF-8''{utf8_name}"})
+        "Content-Disposition": attachment(book.title, f" - {CHANNELS[channel]['name']}.zip", f"-{channel}.zip")})

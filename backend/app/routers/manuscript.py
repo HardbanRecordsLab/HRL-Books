@@ -1,5 +1,6 @@
 """Manuscript (module MS): chapters, versioned content, restore, import from DOCX/TXT/MD."""
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
+from fastapi.responses import Response
 from pydantic import BaseModel, Field
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
@@ -7,6 +8,8 @@ from sqlalchemy.orm import Session
 from app.audit import audit
 from app.db import get_db
 from app.deps import require
+from app.epub import build_epub
+from app.http import attachment
 from app.models import Book, Chapter, ChapterVersion, Membership
 from app.text import docx_to_chapters, sanitize_html, stats, text_to_chapters
 
@@ -191,3 +194,19 @@ async def import_manuscript(book_id: str, file: UploadFile = File(...), m: Membe
     audit(db, "manuscript.imported", m.user_id, m.workspace_id, target=book.id, chapters=len(parts))
     db.commit()
     return {"chapters": len(parts)}
+
+
+@import_router.get("/export/epub")
+def export_epub(book_id: str, lang: str | None = Query(default=None, pattern="^[a-z]{2}$"),
+                m: Membership = Depends(require("read_books")), db: Session = Depends(get_db)):
+    """EPUB 3 with accessibility metadata; chapters in the chosen language (default: the book's)."""
+    book = _book(db, m.workspace_id, book_id)
+    try:
+        data = build_epub(db, book, lang)
+    except ValueError as e:
+        raise HTTPException(422, str(e)) from e
+    audit(db, "epub.exported", m.user_id, m.workspace_id, target=book.id)
+    db.commit()
+    other = lang and lang != book.language
+    disposition = attachment(book.title, f" ({lang.upper()}).epub" if other else ".epub", f"-{lang}.epub" if other else ".epub")
+    return Response(data, media_type="application/epub+zip", headers={"Content-Disposition": disposition})

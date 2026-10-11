@@ -5,7 +5,7 @@ import Underline from "@tiptap/extension-underline";
 import Link from "@tiptap/extension-link";
 import { ApiError, api } from "../lib/api";
 
-type ChapterRow = { id: string; title: string; position: number; status: string; status_label: string; words: number; chars: number };
+type ChapterRow = { id: string; title: string; position: number; status: string; status_label: string; words: number; chars: number; language?: string };
 type ChapterFull = ChapterRow & { body: string; version_id: string | null };
 type Version = { id: string; words: number; origin: string; note: string; created_at: string; body: string };
 
@@ -121,6 +121,18 @@ export default function ManuscriptTab({ base, canEdit, aiSlot }: { base: string;
     loadList();
   };
 
+  const downloadEpub = async (lang?: string) => {
+    setError("");
+    const r = await fetch(`/api/v1${base}/export/epub${lang ? `?lang=${lang}` : ""}`, {
+      headers: { Authorization: `Bearer ${localStorage.getItem("hrlb_access")}` } });
+    if (!r.ok) { const d = await r.json().catch(() => ({})); setError(typeof d.detail === "string" ? d.detail : "Eksport się nie udał."); return; }
+    const name = decodeURIComponent((r.headers.get("Content-Disposition") || "").split("filename*=UTF-8''")[1] || "ksiazka.epub");
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(await r.blob()); a.download = name; a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  };
+  const langs = [...new Set((list?.chapters || []).map((c) => c.language || "pl"))];
+
   const move = async (idx: number, dir: -1 | 1) => {
     if (!list) return;
     const ids = list.chapters.map((c) => c.id);
@@ -161,6 +173,14 @@ export default function ManuscriptTab({ base, canEdit, aiSlot }: { base: string;
             )}
           </div>
         ))}
+        {!!list?.chapters.length && (
+          <div className="stack" style={{ gap: ".3rem" }}>
+            {langs.length > 1 ? langs.map((l) => (
+              <button key={l} className="ghost" onClick={() => downloadEpub(l)}>Pobierz EPUB ({l.toUpperCase()})</button>
+            )) : <button className="ghost" onClick={() => downloadEpub()}>Pobierz EPUB</button>}
+            <span className="muted small">EPUB 3 z metadanymi dostępności — gotowy do KDP, Kobo, Google Play.</span>
+          </div>
+        )}
         {canEdit && (
           <>
             <div className="row"><input style={{ flex: 1, minWidth: 0 }} placeholder="Nowy rozdział" value={newTitle}
