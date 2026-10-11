@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { Navigate, NavLink, Route, Routes, useNavigate, useParams } from "react-router-dom";
-import { api, clearTokens, isLoggedIn, Me, Workspace } from "./lib/api";
+import { api, clearTokens, isLoggedIn, Me, ROLE_LABELS, Workspace } from "./lib/api";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Books from "./pages/Books";
@@ -86,7 +86,7 @@ function Home() {
         {workspaces.map((w) => (
           <NavLink key={w.id} to={`/w/${w.id}`} className="card">
             <h3>{w.name}</h3>
-            <span className="muted small">{w.role}</span>
+            <span className="muted small">{ROLE_LABELS[w.role || ""] || w.role}</span>
           </NavLink>
         ))}
       </div>

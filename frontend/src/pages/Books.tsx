@@ -1,7 +1,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useWorkspace } from "../App";
-import { ApiError, api, Book, STATUS_LABELS } from "../lib/api";
+import { ApiError, api, Book, ROLE_LABELS, STATUS_LABELS } from "../lib/api";
 
 const CAN_CREATE = ["owner", "author"];
 
@@ -75,7 +75,7 @@ export default function Books() {
       <div className="row spread">
         <div>
           <h1>{workspace.name}</h1>
-          <span className="muted small">Twoja rola: {workspace.role}</span>
+          <span className="muted small">Twoja rola: {ROLE_LABELS[workspace.role || ""] || workspace.role}</span>
         </div>
         <div className="row">
           {canCreate && <button onClick={() => setMode(mode === "new" ? "" : "new")}>Nowy tytuł</button>}
