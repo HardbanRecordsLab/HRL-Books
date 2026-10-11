@@ -22,6 +22,8 @@ from app.models import Book, BookContributor, Edition, Listing, Membership, Pers
 from app.schemas import ListingIn, ListingOut
 
 router = APIRouter(prefix="/api/v1/workspaces/{ws}", tags=["distribution"])
+FORMAT_PL = {"ebook_epub": "e-book EPUB", "ebook_pdf": "e-book PDF", "paperback": "miękka oprawa",
+             "hardcover": "twarda oprawa", "audiobook": "audiobook"}
 CONTRIB_PL = {"author": "autor", "editor": "redaktor", "translator": "tłumacz", "cover_designer": "projekt okładki",
               "illustrator": "ilustrator", "narrator": "lektor"}
 
@@ -61,7 +63,7 @@ def channel_issues(book: Book, editions: list[Edition], key: str) -> list[str]:
     if limits.get("desc_long_max") and len(book.desc_long or "") > limits["desc_long_max"]:
         issues.append(f"{ch['name']}: opis może mieć najwyżej {limits['desc_long_max']} znaków (ma {len(book.desc_long)}).")
     if not any(e.format in ch["formats"] for e in editions):
-        names = ", ".join(ch["formats"])
+        names = ", ".join(FORMAT_PL.get(f, f) for f in ch["formats"])
         issues.append(f"{ch['name']}: brak wydania w obsługiwanym formacie ({names}).")
     return issues
 

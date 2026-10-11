@@ -80,7 +80,7 @@ export default function DistributionTab({ base, canManage, onPublished }: { base
                 <div className="stack">
                   <b className="small">Kroki w panelu kanału</b>
                   {r.profile.steps.map((s, i) => (
-                    <label key={i} className="row" style={{ flexDirection: "row", alignItems: "flex-start", color: "var(--text)" }}>
+                    <label key={i} style={{ flexDirection: "row", alignItems: "flex-start", gap: ".5rem", color: "var(--text)" }}>
                       <input type="checkbox" disabled={!canManage} checked={r.checklist.includes(i)}
                         onChange={(e) => update(r.channel, {
                           checklist: e.target.checked ? [...r.checklist, i] : r.checklist.filter((x) => x !== i),
