@@ -99,12 +99,17 @@ export function useWorkspace(): Workspace | undefined {
   return useSession().workspaces.find((w) => w.id === ws);
 }
 
+// Checked on every render of the route (not once in App), so a fresh login is seen right away.
+function RequireAuth() {
+  return isLoggedIn() ? <Shell /> : <Navigate to="/logowanie" replace />;
+}
+
 export default function App() {
   return (
     <Routes>
       <Route path="/logowanie" element={<Login />} />
       <Route path="/rejestracja" element={<Register />} />
-      <Route path="/*" element={isLoggedIn() ? <Shell /> : <Navigate to="/logowanie" replace />} />
+      <Route path="/*" element={<RequireAuth />} />
     </Routes>
   );
 }
