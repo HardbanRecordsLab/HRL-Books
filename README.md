@@ -1,7 +1,8 @@
-# HRL Books — platforma wydawnicza
+# HRL Books
 
-Platforma na zaproszenie, która prowadzi książkę od researchu po dystrybucję i tantiemy.
-Wydawnictwo HRL Books jest pierwszym workspace'em. Specyfikacja (v0.2):
+HRL Books to platforma, a nie tylko wydawnictwo: prowadzi książkę od researchu przez pisanie,
+redakcję i metadane po dystrybucję i tantiemy, dla wielu wydawców i autorów (na zaproszenie).
+Wydawnictwo HRL Books jest jej pierwszym workspace'em. Adres: https://hrl-books.hardbanrecordslab.online Specyfikacja (v0.2):
 https://claude.ai/artifact/6TjwyH9kzW2wTZLufju7GA
 
 ## Stan
@@ -24,7 +25,7 @@ docker compose up -d --build
 docker compose exec api python -m app.cli create-admin kamil@... /ścieżka/do/pliku-z-hasłem
 ```
 
-API: `http://127.0.0.1:8110/api/v1/health`, dokumentacja: `/api/v1/docs`.
+API: `http://127.0.0.1:8127/api/v1/health`, dokumentacja: `/api/v1/docs`.
 
 ## Testy
 

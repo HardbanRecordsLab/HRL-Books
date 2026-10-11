@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     PUBLIC_REGISTRATION: bool = False  # FR-ACC-01: invitation-only by default
     LOGIN_MAX_FAILURES: int = 5
     LOGIN_LOCK_MINUTES: int = 15
-    APP_URL: str = "https://books.hardbanrecordslab.online"
+    APP_URL: str = "https://hrl-books.hardbanrecordslab.online"
 
     SMTP_HOST: str | None = None
     SMTP_PORT: int = 587

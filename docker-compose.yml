@@ -25,7 +25,7 @@ services:
     environment:
       DATABASE_URL: postgresql+psycopg2://hrl_books:${POSTGRES_PASSWORD}@db:5432/hrl_books
     ports:
-      - "127.0.0.1:${API_PORT:-8110}:8000"
+      - "127.0.0.1:${API_PORT:-8127}:8000"
     volumes:
       - hrl_books_files:/app/data
 
