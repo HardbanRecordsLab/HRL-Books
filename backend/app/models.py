@@ -341,3 +341,35 @@ class AIJob(Base):
     created_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, index=True)
     finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
+class RoyaltyImport(Base):
+    """One uploaded sales/royalty report (KDP, Google Play, Kobo, D2D, Virtualo…)."""
+    __tablename__ = "royalty_imports"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_id)
+    workspace_id: Mapped[str] = mapped_column(ForeignKey("workspaces.id", ondelete="CASCADE"), index=True)
+    channel: Mapped[str] = mapped_column(String(30))
+    filename: Mapped[str] = mapped_column(String(300), default="")
+    rows: Mapped[int] = mapped_column(Integer, default=0)
+    duplicates: Mapped[int] = mapped_column(Integer, default=0)
+    created_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class RoyaltyLine(Base):
+    """A report row. amount is in minor units (grosze/cents) of `currency`; no FX conversion."""
+    __tablename__ = "royalty_lines"
+    __table_args__ = (UniqueConstraint("workspace_id", "row_hash"),)
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_id)
+    workspace_id: Mapped[str] = mapped_column(ForeignKey("workspaces.id", ondelete="CASCADE"), index=True)
+    import_id: Mapped[str] = mapped_column(ForeignKey("royalty_imports.id", ondelete="CASCADE"), index=True)
+    book_id: Mapped[str | None] = mapped_column(ForeignKey("books.id", ondelete="SET NULL"), nullable=True, index=True)
+    channel: Mapped[str] = mapped_column(String(30))
+    period: Mapped[str] = mapped_column(String(7), index=True)  # YYYY-MM
+    raw_title: Mapped[str] = mapped_column(String(500), default="")
+    raw_id: Mapped[str] = mapped_column(String(40), default="")  # ISBN / ASIN from the report
+    market: Mapped[str] = mapped_column(String(40), default="")
+    units: Mapped[int] = mapped_column(Integer, default=0)
+    amount: Mapped[int] = mapped_column(Integer, default=0)
+    currency: Mapped[str] = mapped_column(String(3), default="PLN")
+    row_hash: Mapped[str] = mapped_column(String(64))

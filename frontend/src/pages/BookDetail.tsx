@@ -9,6 +9,7 @@ import DistributionTab from "./DistributionTab";
 import ProductsTab from "./ProductsTab";
 import ResearchTab from "./ResearchTab";
 import { AiTab, ChapterAi } from "./AiPanel";
+import { BookRoyalties } from "./Royalties";
 
 
 type StoreLink = { url: string; channel?: string };
@@ -16,14 +17,6 @@ type BookFull = Book & { store_links: StoreLink[]; public: boolean; slug: string
 type AssetRow = { id: string; kind: string; url: string; content_type: string };
 
 const TABS = ["Przegląd", "Metadane", "Produkty i druk", "Dystrybucja", "Research", "Rękopis", "Asystent AI", "Tantiemy"] as const;
-const COMING: Record<string, string> = {
-  Metadane: "Autorzy z rolami, opisy, słowa kluczowe, kategorie, wydania i ceny — jedno źródło danych dla wszystkich sklepów.",
-  "Produkty i druk": "Druk na żądanie przez Gelato — płatność tylko za zamówienie.",
-  Dystrybucja: "Tablica sklepów ze statusami, paczki plików i checklisty dla KDP, Google Play, Kobo, Draft2Digital i Virtualo.",
-  Research: "Źródła, notatki i cytaty z wyszukiwarką oraz przycisk „research zamknięty”.",
-  Rękopis: "Rozdziały z historią wersji, import z Worda, redakcja z pomocą AI i eksport EPUB.",
-  Tantiemy: "Import raportów sprzedaży i zestawienie przychodu per tytuł, sklep i miesiąc.",
-};
 
 function channelOf(url: string) {
   const host = (() => { try { return new URL(url).hostname.replace(/^www\./, ""); } catch { return url; } })();
@@ -236,13 +229,8 @@ export default function BookDetail() {
         <AiTab base={`/workspaces/${ws}/books/${id}`} ws={ws!} canUse={["owner", "editor", "author"].includes(workspace?.role || "")} />
       )}
 
-      {!["Przegląd", "Metadane", "Dystrybucja", "Produkty i druk", "Research", "Rękopis", "Asystent AI"].includes(tab) && (
-        <div className="card empty">
-          <h3>{tab}</h3>
-          <p>{COMING[tab]}</p>
-          <p className="small">Ten moduł jest w budowie — pojawi się tu w kolejnych wydaniach.</p>
-        </div>
-      )}
+      {tab === "Tantiemy" && <BookRoyalties ws={ws!} bookId={id!} isOwner={workspace?.role === "owner"} />}
+
     </div>
   );
 }
