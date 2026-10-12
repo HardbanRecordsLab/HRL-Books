@@ -2,6 +2,7 @@ import { FormEvent, useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useWorkspace } from "../App";
 import { ApiError, api, Book, ROLE_LABELS, STATUS_LABELS } from "../lib/api";
+import { GoogleBooksImport } from "./GoogleBooks";
 
 const CAN_CREATE = ["owner", "author"];
 
@@ -27,7 +28,7 @@ export default function Books() {
   const workspace = useWorkspace();
   const navigate = useNavigate();
   const [books, setBooks] = useState<Book[] | null>(null);
-  const [mode, setMode] = useState<"" | "new" | "import">("");
+  const [mode, setMode] = useState<"" | "new" | "import" | "google">("");
   const [title, setTitle] = useState("");
   const [importText, setImportText] = useState("");
   const [msg, setMsg] = useState("");
@@ -80,6 +81,7 @@ export default function Books() {
         <div className="row">
           {canCreate && <button onClick={() => setMode(mode === "new" ? "" : "new")}>Nowy tytuł</button>}
           {canCreate && <button className="ghost" onClick={() => setMode(mode === "import" ? "" : "import")}>Import wydanych</button>}
+          {canCreate && <button className="ghost" onClick={() => setMode(mode === "google" ? "" : "google")}>Z Google Books</button>}
           {workspace.role !== "reviewer" && <Link className="btn ghost" to={`/w/${ws}/dystrybucja`}>Dystrybucja</Link>}
           {workspace.role === "owner" && <Link className="btn ghost" to={`/w/${ws}/sklep`}>Sklep</Link>}
           {workspace.role === "owner" && <Link className="btn ghost" to={`/w/${ws}/tantiemy`}>Tantiemy</Link>}
@@ -93,6 +95,8 @@ export default function Books() {
           <button>Dodaj</button>
         </form>
       )}
+      {mode === "google" && <GoogleBooksImport ws={ws!} onDone={load} />}
+
       {mode === "import" && (
         <form className="card stack" onSubmit={runImport}>
           <h3>Import już wydanych książek</h3>

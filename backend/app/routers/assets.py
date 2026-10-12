@@ -24,6 +24,21 @@ def asset_public_url(asset: Asset) -> str:
     return f"{get_settings().APP_URL}/api/v1/public/assets/{asset.public_token}"
 
 
+def store_asset(db: Session, ws_id: str, book_id: str | None, kind: str, data: bytes, content_type: str,
+                original_name: str = "") -> Asset:
+    """Write bytes to FILES_DIR and register the Asset (caller validates type and commits)."""
+    folder = Path(get_settings().FILES_DIR) / ws_id
+    folder.mkdir(parents=True, exist_ok=True)
+    path = folder / f"{secrets.token_hex(16)}{ALLOWED[content_type]}"
+    path.write_bytes(data)
+    a = Asset(workspace_id=ws_id, book_id=book_id, kind=kind[:20], original_name=original_name[:300],
+              content_type=content_type, path=str(path), size=len(data), checksum=hashlib.sha256(data).hexdigest(),
+              public_token=secrets.token_urlsafe(32))
+    db.add(a)
+    db.flush()
+    return a
+
+
 def asset_out(a: Asset) -> dict:
     return {"id": a.id, "book_id": a.book_id, "kind": a.kind, "original_name": a.original_name,
             "content_type": a.content_type, "size": a.size, "url": asset_public_url(a), "created_at": a.created_at}
@@ -42,16 +57,7 @@ async def upload(file: UploadFile = File(...), kind: str = Form("design"), book_
         raise HTTPException(415, "Zawartość pliku nie pasuje do jego typu")
     if book_id and db.scalar(select(Book).where(Book.id == book_id, Book.workspace_id == m.workspace_id)) is None:
         raise HTTPException(404, "Nie znaleziono tytułu")
-    folder = Path(get_settings().FILES_DIR) / m.workspace_id
-    folder.mkdir(parents=True, exist_ok=True)
-    token = secrets.token_urlsafe(32)
-    path = folder / f"{secrets.token_hex(16)}{ext}"
-    path.write_bytes(data)
-    a = Asset(workspace_id=m.workspace_id, book_id=book_id or None, kind=kind[:20],
-              original_name=(file.filename or "")[:300], content_type=file.content_type, path=str(path),
-              size=len(data), checksum=hashlib.sha256(data).hexdigest(), public_token=token)
-    db.add(a)
-    db.flush()
+    a = store_asset(db, m.workspace_id, book_id or None, kind, data, file.content_type, file.filename or "")
     audit(db, "asset.uploaded", m.user_id, m.workspace_id, target=a.id, size=len(data))
     db.commit()
     return asset_out(a)

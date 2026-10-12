@@ -1,5 +1,6 @@
 import { FormEvent, useEffect, useState } from "react";
 import { ApiError, api } from "../lib/api";
+import { GoogleBooksFill } from "./GoogleBooks";
 
 type Contributor = { person_id: string; display_name: string; role: string; position: number };
 type Metadata = {
@@ -115,6 +116,7 @@ export default function MetadataTab({ base, canEdit }: { base: string; canEdit: 
 
   return (
     <div className="stack">
+      {canEdit && <div><GoogleBooksFill base={base} onDone={() => load().catch((e) => setError(e.message))} /></div>}
       {checks && (
         <div className="card">
           {checks.complete ? (
