@@ -96,3 +96,12 @@ def test_no_key_is_a_clear_503_and_permissions(client, monkeypatch):
     client.post(f"{base}/invitations", headers=h, json={"email": "rev@example.com", "role": "reviewer"})
     rev = auth(client.post("/api/v1/auth/register", json={"token": last_invite_token(), "password": PASSWORD}).json()["access_token"])
     assert client.get(f"{base}/google-books/search?q=abc", headers=rev).status_code == 403
+
+
+def test_canonical_author_from_identity_rules():
+    from app.routers.google_books import canonical_name
+    rules = [{"canonical": "Kamil Skomra", "forbidden": ["Skomrakus", "K. Skomra"]}]
+    assert canonical_name("Kamil Skomra Skomrakus", rules) == "Kamil Skomra"
+    assert canonical_name("Skomrakus", rules) == "Kamil Skomra"
+    assert canonical_name("Anna Nowak", rules) == "Anna Nowak"
+    assert canonical_name("Kamil Skomra Skomrakus", []) == "Kamil Skomra Skomrakus"

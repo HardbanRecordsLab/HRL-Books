@@ -5,6 +5,7 @@ anonymous calls share one global daily quota that is usually exhausted.
 """
 import json
 import re
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -26,17 +27,30 @@ def _get(path: str, params: dict) -> dict:
         raise IntegrationError("Brak klucza Google Books API (GOOGLE_BOOKS_API_KEY)")
     url = f"{API}{path}?{urllib.parse.urlencode({**params, 'key': key})}"
     req = urllib.request.Request(url, headers={"User-Agent": UA, "Accept": "application/json"})
-    try:
-        with urllib.request.urlopen(req, timeout=15) as r:
-            return json.loads(r.read())
-    except urllib.error.HTTPError as e:
-        if e.code == 429:
-            raise IntegrationError("Wyczerpany dzienny limit Google Books API") from e
-        if e.code == 404:
-            raise IntegrationError("Nie znaleziono w Google Books") from e
-        raise IntegrationError(f"Google Books HTTP {e.code}") from e
-    except (urllib.error.URLError, TimeoutError) as e:
-        raise IntegrationError("Google Books nie odpowiada") from e
+    for attempt in range(3):  # Google Books answers 503 now and then — retry briefly
+        try:
+            with urllib.request.urlopen(req, timeout=15) as r:
+                return json.loads(r.read())
+        except urllib.error.HTTPError as e:
+            if e.code in (500, 502, 503) and attempt < 2:
+                time.sleep(1.5 * (attempt + 1))
+                continue
+            _raise(e)
+        except (urllib.error.URLError, TimeoutError) as e:
+            if attempt < 2:
+                time.sleep(1.5 * (attempt + 1))
+                continue
+            raise IntegrationError("Google Books nie odpowiada") from e
+
+
+def _raise(e: urllib.error.HTTPError):
+    if e.code == 429:
+        raise IntegrationError("Wyczerpany dzienny limit Google Books API") from e
+    if e.code == 404:
+        raise IntegrationError("Nie znaleziono w Google Books") from e
+    if e.code in (500, 502, 503):
+        raise IntegrationError("Google Books chwilowo nie odpowiada — spróbuj za kilka minut") from e
+    raise IntegrationError(f"Google Books HTTP {e.code}") from e
 
 
 def _cover(links: dict) -> str:

@@ -33,6 +33,20 @@ def _norm_title(t: str) -> str:
     return re.sub(r"\W+", "", (t or "").casefold())
 
 
+def canonical_name(name: str, rules: list) -> str:
+    """Map store spellings onto the workspace's canonical author name (Ustawienia → reguły nazwiska),
+    e.g. "Kamil Skomra Skomrakus" -> "Kamil Skomra" when "Skomrakus" is a forbidden variant."""
+    low = name.casefold()
+    for r in rules or []:
+        canon = (r.get("canonical") or "").strip()
+        if not canon:
+            continue
+        variants = [canon] + [f for f in r.get("forbidden", []) if f]
+        if canon.casefold() in low or any(f.casefold() in low for f in variants[1:]):
+            return canon
+    return name
+
+
 def _person(db: Session, ws_id: str, name: str) -> Person:
     p = db.scalar(select(Person).where(Person.workspace_id == ws_id, func.lower(Person.display_name) == name.lower()))
     if p is None:
@@ -61,7 +75,9 @@ def _apply(db: Session, ws_id: str, book: Book, v: dict, only_empty: bool) -> li
         changed.append("store_links")
 
     if v["authors"] and not db.scalar(select(func.count()).select_from(BookContributor).where(BookContributor.book_id == book.id)):
-        for i, name in enumerate(v["authors"][:10]):
+        rules = db.get(Workspace, ws_id).identity_rules
+        names = list(dict.fromkeys(canonical_name(n, rules) for n in v["authors"][:10]))
+        for i, name in enumerate(names):
             db.add(BookContributor(workspace_id=ws_id, book_id=book.id, person_id=_person(db, ws_id, name).id, role="author", position=i))
         changed.append("authors")
 
