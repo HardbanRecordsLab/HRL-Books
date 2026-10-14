@@ -113,6 +113,9 @@ def stripe_checkout_session(order_id: str, name: str, unit_amount: int, quantity
         ("mode", "payment"),
         ("client_reference_id", order_id),
         ("metadata[order_id]", order_id),
+        ("metadata[app]", "hrl-books"),  # shared Stripe account: lets reports (and other apps' webhooks) tell sales apart
+        ("payment_intent_data[metadata][app]", "hrl-books"),
+        ("payment_intent_data[metadata][order_id]", order_id),
         ("line_items[0][quantity]", str(quantity)),
         ("line_items[0][price_data][currency]", "pln"),
         ("line_items[0][price_data][unit_amount]", str(unit_amount)),
