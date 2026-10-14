@@ -77,7 +77,7 @@ def normalize(item: dict) -> dict:
     desc = html_to_text(v.get("description", ""))
     return {
         "id": item.get("id"),
-        "title": (v.get("title") or "").strip(),
+        "title": (v.get("title") or "").strip().strip("„”“\"'").strip(),  # stores keep stray quotes
         "subtitle": (v.get("subtitle") or "").strip(),
         "authors": [a.strip() for a in v.get("authors", []) if a.strip()],
         "publisher": v.get("publisher", ""),
