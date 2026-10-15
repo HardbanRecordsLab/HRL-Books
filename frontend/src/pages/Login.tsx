@@ -32,6 +32,7 @@ export default function Login() {
         <label>Hasło<input type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} required /></label>
         {error && <div className="error">{error}</div>}
         <button disabled={busy}>{busy ? "Logowanie…" : "Zaloguj się"}</button>
+        <a className="muted small" href="https://hardbanrecordslab.online/">← Strona główna hardbanrecordslab.online</a>
       </form>
     </div>
   );

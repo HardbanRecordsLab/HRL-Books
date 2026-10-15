@@ -56,6 +56,7 @@ function Shell() {
             {session.me.is_platform_admin && <NavLink to="/admin">Administracja</NavLink>}
           </nav>
           <div style={{ marginTop: "auto" }} className="stack small">
+            <a className="muted small" href="https://hardbanrecordslab.online/">← hardbanrecordslab.online</a>
             <span className="muted">{session.me.email}</span>
             <button className="ghost" onClick={logout}>Wyloguj</button>
           </div>
