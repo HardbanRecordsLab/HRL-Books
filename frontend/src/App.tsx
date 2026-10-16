@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { Navigate, NavLink, Route, Routes, useNavigate, useParams } from "react-router-dom";
 import { api, clearTokens, isLoggedIn, Me, ROLE_LABELS, Workspace } from "./lib/api";
+import { NOINDEX, setSeo } from "./lib/seo";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Books from "./pages/Books";
@@ -113,16 +114,22 @@ function RequireAuth() {
   return isLoggedIn() ? <Shell /> : <Navigate to="/logowanie" replace />;
 }
 
+// Login wall, registration and the author panel are not search results: noindex while mounted.
+function NoIndex({ children }: { children: React.ReactNode }) {
+  useEffect(() => setSeo(NOINDEX), []);
+  return <>{children}</>;
+}
+
 export default function App() {
   return (
     <Routes>
-      <Route path="/logowanie" element={<Login />} />
-      <Route path="/rejestracja" element={<Register />} />
-      <Route path="/sklep/dziekujemy" element={<ThankYouPage />} />
+      <Route path="/logowanie" element={<NoIndex><Login /></NoIndex>} />
+      <Route path="/rejestracja" element={<NoIndex><Register /></NoIndex>} />
+      <Route path="/sklep/dziekujemy" element={<NoIndex><ThankYouPage /></NoIndex>} />
       <Route path="/sklep/:id" element={<PublicProductPage />} />
       <Route path="/ksiegarnia/:ws" element={<BookshopPage />} />
       <Route path="/ksiegarnia/:ws/:slug" element={<PublicBookPage />} />
-      <Route path="/*" element={<RequireAuth />} />
+      <Route path="/*" element={<NoIndex><RequireAuth /></NoIndex>} />
     </Routes>
   );
 }

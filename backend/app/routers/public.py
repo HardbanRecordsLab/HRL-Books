@@ -1,7 +1,7 @@
 """Public bookshop pages (no login): workspace catalog and a page per title with store buttons and merch."""
 from urllib.parse import urlparse
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Response
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -50,6 +50,27 @@ def _card(db: Session, ws: Workspace, b: Book) -> dict:
     return {"slug": b.slug, "title": b.title, "subtitle": b.subtitle, "desc_short": b.desc_short, "cover_url": _cover(db, b),
             "authors": [p.display_name for c, p in _people(db, b) if c.role == "author"], "series": b.series_name,
             "series_volume": b.series_volume}
+
+
+@router.get("/sitemap.xml", include_in_schema=False)
+def sitemap(db: Session = Depends(get_db)):
+    """sitemap.xml for search engines (the host nginx maps /sitemap.xml here): public books and active products only."""
+    from xml.sax.saxutils import escape
+    base = get_settings().APP_URL.rstrip("/")
+    urls: list[str] = []
+    for ws in db.scalars(select(Workspace).where(Workspace.status == "active").order_by(Workspace.slug)):
+        books = list(db.scalars(select(Book).where(Book.workspace_id == ws.id, Book.public.is_(True), Book.deleted_at.is_(None),
+                                                   Book.slug != "").order_by(Book.slug)))
+        if not books:
+            continue
+        urls.append(f"{base}/ksiegarnia/{ws.slug}")
+        urls += [f"{base}/ksiegarnia/{ws.slug}/{b.slug}" for b in books]
+        ids = {b.id for b in books}
+        urls += [f"{base}/sklep/{p.id}" for p in db.scalars(select(Product).where(Product.workspace_id == ws.id, Product.active.is_(True)))
+                 if not p.book_id or p.book_id in ids]
+    body = "".join(f"<url><loc>{escape(u)}</loc></url>" for u in urls)
+    return Response(f'<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{body}</urlset>',
+                    media_type="application/xml")
 
 
 @router.get("/{ws_slug}")
