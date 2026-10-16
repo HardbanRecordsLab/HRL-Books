@@ -1,0 +1,5 @@
+# Author panel and bookstore app: pages carry noindex, product page lives on hardbanrecordslab.online/hrl-books/
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /w/
