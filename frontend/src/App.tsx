@@ -9,6 +9,7 @@ import BookDetail from "./pages/BookDetail";
 import Settings from "./pages/Settings";
 import Admin from "./pages/Admin";
 import Distribution from "./pages/Distribution";
+import Publishing from "./pages/Publishing";
 import Shop from "./pages/Shop";
 import RoyaltiesPage from "./pages/Royalties";
 import { PublicProductPage, ThankYouPage } from "./pages/PublicShop";
@@ -69,6 +70,7 @@ function Shell() {
             <Route path="w/:ws/ksiazki/:id" element={<BookDetail />} />
             <Route path="w/:ws/ustawienia" element={<Settings />} />
             <Route path="w/:ws/dystrybucja" element={<Distribution />} />
+            <Route path="w/:ws/publikacja" element={<Publishing />} />
             <Route path="w/:ws/sklep" element={<Shop />} />
             <Route path="w/:ws/tantiemy" element={<RoyaltiesPage />} />
             <Route path="admin" element={session.me.is_platform_admin ? <Admin /> : <Navigate to="/" />} />

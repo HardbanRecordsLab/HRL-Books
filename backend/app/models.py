@@ -123,6 +123,8 @@ class Book(Base):
     # Public book page /ksiegarnia/{workspace slug}/{slug}; off until the owner publishes it.
     public: Mapped[bool] = mapped_column(Boolean, default=False)
     slug: Mapped[str] = mapped_column(String(120), default="", index=True)
+    # Title is enrolled in Amazon KDP Select: the e-book may not be sold in any other store while the 90-day term runs.
+    kdp_select: Mapped[bool] = mapped_column(Boolean, default=False)
     created_by: Mapped[str] = mapped_column(ForeignKey("users.id"))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)  # soft delete, 30 days
@@ -168,6 +170,18 @@ class Edition(Base):
     drm: Mapped[bool] = mapped_column(Boolean, default=False)
     # [{"market": "PL", "currency": "PLN", "amount": 39.99}]
     prices: Mapped[list] = mapped_column(JSON, default=list)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class IsbnPool(Base):
+    """The publisher's own ISBNs (bought / assigned by the national agency): free until written onto an edition."""
+    __tablename__ = "isbn_pool"
+    __table_args__ = (UniqueConstraint("workspace_id", "isbn"),)
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_id)
+    workspace_id: Mapped[str] = mapped_column(ForeignKey("workspaces.id", ondelete="CASCADE"), index=True)
+    isbn: Mapped[str] = mapped_column(String(13))
+    note: Mapped[str] = mapped_column(String(200), default="")
+    edition_id: Mapped[str | None] = mapped_column(ForeignKey("editions.id", ondelete="SET NULL"), nullable=True, index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
 

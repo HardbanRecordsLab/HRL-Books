@@ -98,6 +98,7 @@ class BookPatchIn(BaseModel):
     # Soft research gate: reason for entering 'writing' before research is closed (FR-RES-05).
     gate_override_reason: str | None = Field(default=None, max_length=1000)
     public: bool | None = None
+    kdp_select: bool | None = None
     slug: str | None = Field(default=None, pattern=r"^[a-z0-9]+(-[a-z0-9]+)*$", max_length=120)
 
 
@@ -121,6 +122,7 @@ class BookOut(BaseModel):
     desc_short: str
     store_links: list[dict]
     public: bool = False
+    kdp_select: bool = False
     slug: str = ""
     created_at: datetime
 

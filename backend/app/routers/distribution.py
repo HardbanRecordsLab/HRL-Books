@@ -17,7 +17,7 @@ from app.db import get_db
 from app.epub import build_epub
 from app.http import attachment
 from app.deps import require
-from app.models import Book, BookContributor, Edition, Listing, Membership, Person, Workspace, utcnow
+from app.models import Asset, Book, BookContributor, Edition, Listing, Membership, Person, Workspace, utcnow
 from app.schemas import ListingIn, ListingOut
 
 router = APIRouter(prefix="/api/v1/workspaces/{ws}", tags=["distribution"])
@@ -61,6 +61,9 @@ def channel_issues(book: Book, editions: list[Edition], key: str) -> list[str]:
         issues.append(f"{ch['name']}: maksymalnie {limits['keywords_max']} słów kluczowych (jest {len(book.keywords)}).")
     if limits.get("desc_long_max") and len(book.desc_long or "") > limits["desc_long_max"]:
         issues.append(f"{ch['name']}: opis może mieć najwyżej {limits['desc_long_max']} znaków (ma {len(book.desc_long)}).")
+    if key != "kdp" and book.kdp_select and any(f.startswith("ebook") for f in ch["formats"]):
+        issues.append(f"{ch['name']}: tytuł jest w KDP Select — e-booka nie wolno sprzedawać gdzie indziej, dopóki trwa "
+                      "wyłączność. Wyłącz odnowienie w KDP i po zakończeniu okresu odznacz „KDP Select” w karcie książki.")
     if not any(e.format in ch["formats"] for e in editions):
         names = ", ".join(FORMAT_PL.get(f, f) for f in ch["formats"])
         issues.append(f"{ch['name']}: brak wydania w obsługiwanym formacie ({names}).")
@@ -169,6 +172,13 @@ def _package(db: Session, ws: Workspace, book: Book, key: str) -> bytes:
             w.writerow([f"wydanie {e['format']}", f"ISBN {e['isbn'] or '—'}; premiera {e['release_date'] or '—'}; {prices}"])
         z.writestr("metadane.csv", "﻿" + rows.getvalue())
         z.writestr("opis.txt", book.desc_long or book.desc_short)
+        cover = db.scalar(select(Asset).where(Asset.book_id == book.id, Asset.kind == "cover").order_by(Asset.created_at.desc()))
+        if cover is not None:
+            try:
+                with open(cover.path, "rb") as fh:
+                    z.writestr("okladka" + (".png" if cover.content_type == "image/png" else ".jpg"), fh.read())
+            except OSError:
+                pass  # file missing on disk: the instructions still tell the user to add the cover
         if "ebook_epub" in ch["formats"]:
             try:
                 z.writestr("ksiazka.epub", build_epub(db, book), compress_type=zipfile.ZIP_STORED)
@@ -179,7 +189,7 @@ def _package(db: Session, ws: Workspace, book: Book, key: str) -> bytes:
         ai_line = ("Treści AI do zadeklarowania: " + ", ".join(k for k, v in ai.items() if v)) if any(ai.values()) else "Brak treści wygenerowanych przez AI do zadeklarowania."
         z.writestr("INSTRUKCJA.txt",
                    f"{ch['name']} — {book.title}\nPanel: {ch['panel_url']}\n\n{steps}\n\n{ai_line}\n\n"
-                   f"Plik ksiazka.epub jest w paczce, jeśli rękopis ma tekst. Okładkę dołącz z karty książki.\nWygenerowano w HRL Books {datetime.now():%Y-%m-%d %H:%M}.\n")
+                   f"Plik ksiazka.epub jest w paczce, jeśli rękopis ma tekst. Okładka (okladka.jpg/png) jest w paczce, jeśli została dodana do książki.\nWygenerowano w HRL Books {datetime.now():%Y-%m-%d %H:%M}.\n")
     return buf.getvalue()
 
 
