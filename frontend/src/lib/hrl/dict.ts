@@ -1335,5 +1335,65 @@ export const PAIRS: Array<[string, string]> = [
 [
 "Nie znaleziono",
 "Not Found"
+],
+[
+"Sklep",
+"Shop"
+],
+[
+"Zapisz",
+"Save"
+],
+[
+"Dodaj",
+"Add"
+],
+[
+"Produkty",
+"Products"
+],
+[
+"Sprzedaż własna",
+"Own sales"
+],
+[
+"Google Play Książki",
+"Google Play Books"
+],
+[
+". Karta książki ostrzeże, gdy zakazany wariant pojawi się w tytule, opisach albo biogramach.",
+". The book card will warn when a forbidden variant appears in the title, descriptions or bios."
+],
+[
+"brak okładki, długi opis, słowa kluczowe, kategorie, autor, właściciel praw autorskich, rok praw autorskich, co najmniej jedno wydanie",
+"missing cover, long description, keywords, categories, author, copyright holder, copyright year, at least one edition"
+],
+[
+"{}: brak wydania w obsługiwanym formacie ({}).",
+"{}: no edition in a supported format ({})."
+],
+[
+"e-book EPUB, miękka oprawa, twarda oprawa",
+"EPUB e-book, paperback, hardcover"
+],
+[
+"e-book EPUB, e-book PDF",
+"EPUB e-book, PDF e-book"
+],
+[
+"e-book EPUB, miękka oprawa",
+"EPUB e-book, paperback"
+],
+[
+"e-book EPUB, e-book PDF, miękka oprawa, audiobook",
+"EPUB e-book, PDF e-book, paperback, audiobook"
+],
+[
+"e-book EPUB",
+"EPUB e-book"
+],
+[
+"Najedź na status, żeby zobaczyć, co blokuje sklep. Statusy „Wysłane” i „W weryfikacji” system sam zmienia na „Opublikowane”, gdy strona w sklepie zaczyna odpowiadać (przycisk „Sprawdź statusy”). Sklepy, które blokują boty, pozostają do ręcznego potwierdzenia.",
+"Hover over a status to see what blocks the store. The system changes the “Sent” and “In review” statuses to “Published” by itself once the store page starts responding (the “Check statuses” button). Stores that block bots stay for manual confirmation."
 ]
 ];
