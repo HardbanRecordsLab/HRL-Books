@@ -1291,5 +1291,49 @@ export const PAIRS: Array<[string, string]> = [
 [
 "Powiadomienia",
 "Notifications"
+],
+[
+"{} · premiera {} · język: {}",
+"{} · premiere {} · language: {}"
+],
+[
+"{} · premiera {}",
+"{} · premiere {}"
+],
+[
+"{} · język: {}",
+"{} · language: {}"
+],
+[
+"premiera {} · język: {}",
+"premiere {} · language: {}"
+],
+[
+"premiera {}",
+"premiere {}"
+],
+[
+"język: {}",
+"language: {}"
+],
+[
+"angielski",
+"English"
+],
+[
+"polski",
+"Polish"
+],
+[
+"Wydawnictwo HRL Books",
+"HRL Books Publishing"
+],
+[
+"{} | Wydawnictwo HRL Books",
+"{} | HRL Books Publishing"
+],
+[
+"Nie znaleziono",
+"Not Found"
 ]
 ];
