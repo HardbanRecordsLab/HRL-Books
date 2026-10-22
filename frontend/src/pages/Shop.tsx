@@ -47,7 +47,7 @@ export default function Shop() {
                     <td className="small">{new Date(o.created_at).toLocaleString("pl-PL")}</td>
                     <td>{o.product_title} × {o.quantity}</td>
                     <td className="small">{o.customer_name || "—"}<div className="muted">{o.customer_email}{o.shipping?.city ? ` · ${o.shipping.city}` : ""}</div></td>
-                    <td>{o.amount.toFixed(2)} zł</td>
+                    <td>${o.amount.toFixed(2)}</td>
                     <td className="small">
                       <span className={o.status === "failed" ? "error" : o.status === "delivered" ? "ok" : ""}>{o.status_label}</span>
                       {o.tracking.map((t) => <div key={t.code}><a href={t.url} target="_blank" rel="noopener noreferrer">śledź {t.code}</a></div>)}
@@ -69,7 +69,7 @@ export default function Shop() {
               {products.map((p) => (
                 <tr key={p.id}>
                   <td><b>{p.title}</b><div className="muted small">{p.catalog_label}</div></td>
-                  <td>{p.price.toFixed(2)} zł</td>
+                  <td>${p.price.toFixed(2)}</td>
                   <td className="small">{p.active ? <a href={p.public_url} target="_blank" rel="noopener noreferrer">strona produktu ↗</a> : <span className="muted">wyłączony</span>}</td>
                 </tr>
               ))}

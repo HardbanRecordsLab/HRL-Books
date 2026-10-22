@@ -124,7 +124,7 @@ export default function ProductsTab({ ws, bookId, bookTitle, canManage }: { ws: 
             <div className="row">
               {p.design_url && <img src={p.design_url} alt="" style={{ width: 48, height: 48, objectFit: "cover", borderRadius: 6 }} />}
               <div>
-                <b>{p.title}</b> <span className="muted small">· {p.catalog_label} · {p.price.toFixed(2)} zł</span>
+                <b>{p.title}</b> <span className="muted small">· {p.catalog_label} · ${p.price.toFixed(2)}</span>
                 <div className="small"><a href={p.public_url} target="_blank" rel="noopener noreferrer">Strona produktu ↗</a>
                   {!p.active && <span className="muted"> · wyłączony</span>}</div>
               </div>
@@ -157,12 +157,12 @@ export default function ProductsTab({ ws, bookId, bookTitle, canManage }: { ws: 
           {asset && asset.content_type.startsWith("image/") && <img src={asset.url} alt="" style={{ maxWidth: 220, borderRadius: 8 }} />}
           <label>Nazwa w sklepie<input value={title} onChange={(e) => setTitle(e.target.value)} required /></label>
           <label>Opis<textarea value={desc} onChange={(e) => setDesc(e.target.value)} /></label>
-          <label>Cena dla klienta z wysyłką (zł)<input inputMode="decimal" value={price} onChange={(e) => setPrice(e.target.value)} required /></label>
+          <label>Cena dla klienta z wysyłką (USD)<input inputMode="decimal" value={price} onChange={(e) => setPrice(e.target.value)} required /></label>
           {quote && (
             <div className="card small" style={{ background: "var(--panel-2)" }}>
-              Koszt Gelato: druk {quote.product.toFixed(2)} zł + wysyłka {quote.shipping.toFixed(2)} zł ({quote.shipping_method},{" "}
-              {quote.delivery_days.join("–")} dni) = <b>{cost.toFixed(2)} zł</b>.
-              {margin !== null && <> Zostaje Tobie przed opłatą Stripe: <b className={margin > 0 ? "ok" : "error"}>{margin.toFixed(2)} zł</b>.</>}
+              Koszt Gelato: druk ${quote.product.toFixed(2)} + wysyłka ${quote.shipping.toFixed(2)} ({quote.shipping_method},{" "}
+              {quote.delivery_days.join("–")} dni) = <b>${cost.toFixed(2)}</b>.
+              {margin !== null && <> Zostaje Tobie przed opłatą Stripe: <b className={margin > 0 ? "ok" : "error"}>${margin.toFixed(2)}</b>.</>}
             </div>
           )}
           {busy && <div className="muted small">{busy}</div>}

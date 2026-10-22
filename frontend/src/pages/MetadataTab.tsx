@@ -96,7 +96,7 @@ export default function MetadataTab({ base, canEdit }: { base: string; canEdit: 
       const body = {
         format: newEd.format, isbn: newEd.isbn.trim(), release_date: newEd.release_date,
         pages: newEd.pages ? Number(newEd.pages) : null,
-        prices: newEd.price ? [{ market: "PL", currency: "PLN", amount: Number(newEd.price.replace(",", ".")) }] : [],
+        prices: newEd.price ? [{ market: "US", currency: "USD", amount: Number(newEd.price.replace(",", ".")) }] : [],
       };
       const ed = await api<Edition>(`${base}/editions`, { method: "POST", body });
       setEditions([...editions, ed]);
@@ -210,7 +210,7 @@ export default function MetadataTab({ base, canEdit }: { base: string; canEdit: 
                   <select style={{ flex: 1 }} value={newEd.format} onChange={(e) => setNewEd({ ...newEd, format: e.target.value })}>
                     {Object.entries(FORMATS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
                   </select>
-                  <input style={{ width: 110 }} placeholder="cena PLN" inputMode="decimal" value={newEd.price} onChange={(e) => setNewEd({ ...newEd, price: e.target.value })} />
+                  <input style={{ width: 110 }} placeholder="cena USD" inputMode="decimal" value={newEd.price} onChange={(e) => setNewEd({ ...newEd, price: e.target.value })} />
                 </div>
                 <div className="row">
                   <input style={{ flex: 1 }} type="date" value={newEd.release_date} onChange={(e) => setNewEd({ ...newEd, release_date: e.target.value })} />

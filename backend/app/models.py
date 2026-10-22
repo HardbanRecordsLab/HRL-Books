@@ -168,7 +168,7 @@ class Edition(Base):
     release_date: Mapped[str] = mapped_column(String(10), default="")  # YYYY-MM-DD
     pages: Mapped[int | None] = mapped_column(Integer, nullable=True)
     drm: Mapped[bool] = mapped_column(Boolean, default=False)
-    # [{"market": "PL", "currency": "PLN", "amount": 39.99}]
+    # [{"market": "US", "currency": "USD", "amount": 12.99}]
     prices: Mapped[list] = mapped_column(JSON, default=list)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
@@ -233,8 +233,8 @@ class Product(Base):
     gelato_catalog: Mapped[str] = mapped_column(String(80))
     gelato_product_uid: Mapped[str] = mapped_column(String(300))
     design_asset_id: Mapped[str] = mapped_column(ForeignKey("assets.id"))
-    price_amount: Mapped[int] = mapped_column(Integer)  # in grosze (PLN cents), shipping included
-    currency: Mapped[str] = mapped_column(String(3), default="PLN")
+    price_amount: Mapped[int] = mapped_column(Integer)  # in cents (USD), shipping included
+    currency: Mapped[str] = mapped_column(String(3), default="USD")
     active: Mapped[bool] = mapped_column(Boolean, default=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
@@ -250,7 +250,7 @@ class Order(Base):
     quantity: Mapped[int] = mapped_column(Integer, default=1)
     status: Mapped[str] = mapped_column(String(20), default="pending_payment")
     amount_total: Mapped[int] = mapped_column(Integer)
-    currency: Mapped[str] = mapped_column(String(3), default="PLN")
+    currency: Mapped[str] = mapped_column(String(3), default="USD")
     customer_email: Mapped[str] = mapped_column(String(320), default="")
     customer_name: Mapped[str] = mapped_column(String(300), default="")
     shipping: Mapped[dict] = mapped_column(JSON, default=dict)

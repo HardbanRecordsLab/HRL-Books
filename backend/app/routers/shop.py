@@ -34,7 +34,7 @@ class ProductIn(BaseModel):
     gelato_catalog: str
     gelato_product_uid: str = Field(min_length=3, max_length=300)
     design_asset_id: str
-    price: float = Field(gt=0, le=100000)  # PLN, shipping included
+    price: float = Field(gt=0, le=100000)  # USD, shipping included
     book_id: str | None = None
     active: bool = True
 

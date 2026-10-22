@@ -47,7 +47,7 @@ export function PublicProductPage() {
       <div className="muted small">{p.catalog_label}{p.book_title ? ` · z motywem książki „${p.book_title}”` : ""}</div>
       {p.description && <p style={{ whiteSpace: "pre-line" }}>{p.description}</p>}
       <div className="row spread">
-        <b style={{ fontSize: "1.4rem" }}>{(p.price * qty).toFixed(2)} zł</b>
+        <b style={{ fontSize: "1.4rem" }}>${(p.price * qty).toFixed(2)}</b>
         <label className="row" style={{ flexDirection: "row" }}>Sztuk
           <input type="number" min={1} max={20} value={qty} style={{ width: 70 }} onChange={(e) => setQty(Math.max(1, Math.min(20, Number(e.target.value) || 1)))} />
         </label>
@@ -81,7 +81,7 @@ export function ThankYouPage() {
       <h1>Dziękujemy!</h1>
       {o ? (
         <>
-          <p>{o.product_title} × {o.quantity} — {o.amount.toFixed(2)} zł</p>
+          <p>{o.product_title} × {o.quantity} — ${o.amount.toFixed(2)}</p>
           <p>Status: <b>{o.status_label}</b></p>
           {o.status === "pending_payment" && <p className="muted small">Czekamy na potwierdzenie płatności — strona odświeży się sama.</p>}
           {o.tracking.map((t) => <a key={t.code} href={t.url} target="_blank" rel="noopener noreferrer">Śledź przesyłkę {t.code}</a>)}

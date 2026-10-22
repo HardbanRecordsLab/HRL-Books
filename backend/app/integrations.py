@@ -66,9 +66,9 @@ def gelato_products(catalog: str, limit: int = 60) -> list[dict]:
 
 
 def gelato_quote(product_uid: str, design_url: str, country: str = "PL", quantity: int = 1) -> dict:
-    """Production price + cheapest shipping to the country, in PLN."""
+    """Production price + cheapest shipping to the country, in USD."""
     res = _gelato("POST", "https://order.gelatoapis.com/v4/orders:quote", {
-        "orderReferenceId": f"quote-{int(time.time())}", "customerReferenceId": "hrl-books", "currency": "PLN",
+        "orderReferenceId": f"quote-{int(time.time())}", "customerReferenceId": "hrl-books", "currency": "USD",
         "recipient": {"country": country, "firstName": "Wycena", "lastName": "HRL", "addressLine1": "Marszałkowska 1",
                       "city": "Warszawa", "postCode": "00-001", "email": "no-reply@hardbanrecordslab.online"},
         "products": [{"itemReferenceId": "q1", "productUid": product_uid, "files": [{"type": "default", "url": design_url}],
@@ -84,7 +84,7 @@ def gelato_quote(product_uid: str, design_url: str, country: str = "PL", quantit
 
 def gelato_create_order(order_ref: str, product_uid: str, design_url: str, quantity: int, recipient: dict) -> dict:
     return _gelato("POST", "https://order.gelatoapis.com/v4/orders", {
-        "orderType": "order", "orderReferenceId": order_ref, "customerReferenceId": "hrl-books", "currency": "PLN",
+        "orderType": "order", "orderReferenceId": order_ref, "customerReferenceId": "hrl-books", "currency": "USD",
         "items": [{"itemReferenceId": f"{order_ref}-1", "productUid": product_uid,
                    "files": [{"type": "default", "url": design_url}], "quantity": quantity}],
         "shippingAddress": recipient,
@@ -117,7 +117,7 @@ def stripe_checkout_session(order_id: str, name: str, unit_amount: int, quantity
         ("payment_intent_data[metadata][app]", "hrl-books"),
         ("payment_intent_data[metadata][order_id]", order_id),
         ("line_items[0][quantity]", str(quantity)),
-        ("line_items[0][price_data][currency]", "pln"),
+        ("line_items[0][price_data][currency]", "usd"),
         ("line_items[0][price_data][unit_amount]", str(unit_amount)),
         ("line_items[0][price_data][product_data][name]", name[:250]),
         ("phone_number_collection[enabled]", "true"),

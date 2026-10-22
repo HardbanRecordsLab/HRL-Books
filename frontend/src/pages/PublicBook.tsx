@@ -151,7 +151,7 @@ export function PublicBookPage() {
               {b.products.map((p) => (
                 <Link key={p.id} to={`/sklep/${p.id}`} className="card stack" style={{ gap: ".3rem", color: "var(--text)", textDecoration: "none" }}>
                   {p.design_url && <img src={p.design_url} alt={p.title} style={{ width: "100%", aspectRatio: "1", objectFit: "contain", background: "#fff", borderRadius: 6 }} />}
-                  <b>{p.title}</b><span className="muted small">{p.catalog_label}</span><span>{p.price.toFixed(2)} zł</span>
+                  <b>{p.title}</b><span className="muted small">{p.catalog_label}</span><span>${p.price.toFixed(2)}</span>
                 </Link>
               ))}
             </div>
