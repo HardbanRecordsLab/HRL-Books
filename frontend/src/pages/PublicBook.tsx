@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { api } from "../lib/api";
 import { setSeo } from "../lib/seo";
+import HrlLangSwitch from "../lib/hrl/HrlLangSwitch";
 
 type Card = { slug: string; title: string; subtitle: string; desc_short: string; cover_url: string; authors: string[];
   series: string; series_volume: number | null };
@@ -20,7 +21,10 @@ function Shell({ ws, name, children }: { ws?: string; name?: string; children: R
         <Link to={ws ? `/ksiegarnia/${ws}` : "/"} style={{ textDecoration: "none" }}>
           <div className="brand">{name || <>HRL <span>Books</span></>}</div>
         </Link>
-        {ws && <Link className="small" to={`/ksiegarnia/${ws}`}>Wszystkie książki</Link>}
+        <div className="row" style={{ gap: "0.8rem" }}>
+          <HrlLangSwitch />
+          {ws && <Link className="small" to={`/ksiegarnia/${ws}`}>Wszystkie książki</Link>}
+        </div>
       </header>
       {children}
       <footer className="muted small" style={{ marginTop: "3rem", borderTop: "1px solid var(--line)", paddingTop: "1rem" }}>

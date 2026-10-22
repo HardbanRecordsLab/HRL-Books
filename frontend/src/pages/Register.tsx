@@ -1,6 +1,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { ApiError, api, ROLE_LABELS, saveTokens, Tokens } from "../lib/api";
+import HrlLangSwitch from "../lib/hrl/HrlLangSwitch";
 
 type Invite = { email: string; role: string; workspace_id: string };
 
@@ -37,7 +38,7 @@ export default function Register() {
   return (
     <div className="center">
       <form className="card auth stack" onSubmit={submit}>
-        <div className="brand">HRL <span>Books</span></div>
+        <div className="row spread"><div className="brand">HRL <span>Books</span></div><HrlLangSwitch /></div>
         {!invite && !error && <p className="muted">Sprawdzam zaproszenie…</p>}
         {invite && (
           <>

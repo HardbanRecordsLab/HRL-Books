@@ -14,6 +14,7 @@ import Shop from "./pages/Shop";
 import RoyaltiesPage from "./pages/Royalties";
 import { PublicProductPage, ThankYouPage } from "./pages/PublicShop";
 import { BookshopPage, PublicBookPage } from "./pages/PublicBook";
+import HrlLangSwitch from "./lib/hrl/HrlLangSwitch";
 
 type Session = { me: Me; workspaces: Workspace[]; reload: () => Promise<void> };
 const SessionCtx = createContext<Session | null>(null);
@@ -60,6 +61,7 @@ function Shell() {
           <div style={{ marginTop: "auto" }} className="stack small">
             <a className="muted small" href="https://hardbanrecordslab.online/">← hardbanrecordslab.online</a>
             <span className="muted">{session.me.email}</span>
+            <HrlLangSwitch />
             <button className="ghost" onClick={logout}>Wyloguj</button>
           </div>
         </aside>

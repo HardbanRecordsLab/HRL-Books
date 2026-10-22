@@ -1,6 +1,7 @@
 import { FormEvent, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ApiError, api, saveTokens, Tokens } from "../lib/api";
+import HrlLangSwitch from "../lib/hrl/HrlLangSwitch";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -26,7 +27,7 @@ export default function Login() {
   return (
     <div className="center">
       <form className="card auth stack" onSubmit={submit}>
-        <div className="brand">HRL <span>Books</span></div>
+        <div className="row spread"><div className="brand">HRL <span>Books</span></div><HrlLangSwitch /></div>
         <p className="muted small">Platforma, która prowadzi książkę od researchu po sprzedaż. Dostęp na zaproszenie.</p>
         <label>E-mail<input type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} required /></label>
         <label>Hasło<input type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} required /></label>
