@@ -217,7 +217,7 @@ def public_product(product_id: str, db: Session = Depends(get_db)):
 
 
 @router.post("/api/v1/public/products/{product_id}/checkout")
-def checkout(product_id: str, body: CheckoutIn, db: Session = Depends(get_db)):
+def checkout(product_id: str, body: CheckoutIn, request: Request, db: Session = Depends(get_db)):
     p = db.get(Product, product_id)
     if p is None or not p.active:
         raise HTTPException(404, "Produkt niedostępny")
@@ -229,7 +229,8 @@ def checkout(product_id: str, body: CheckoutIn, db: Session = Depends(get_db)):
     image = asset_public_url(asset) if asset and asset.content_type.startswith("image/") else ""
     try:
         session = gi.stripe_checkout_session(o.id, p.title, p.price_amount, body.quantity, image,
-                                             f"{base}/sklep/dziekujemy?zamowienie={o.id}", f"{base}/sklep/{p.id}")
+                                             f"{base}/sklep/dziekujemy?zamowienie={o.id}", f"{base}/sklep/{p.id}",
+                                             lang="pl" if request.cookies.get("hrl_lang") == "pl" else "en")
     except gi.IntegrationError as e:
         db.rollback()
         raise HTTPException(502, "Płatności są chwilowo niedostępne") from e

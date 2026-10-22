@@ -107,7 +107,7 @@ def _stripe(method: str, path: str, form: list[tuple[str, str]] | None = None):
 
 
 def stripe_checkout_session(order_id: str, name: str, unit_amount: int, quantity: int, image_url: str,
-                            success_url: str, cancel_url: str) -> dict:
+                            success_url: str, cancel_url: str, lang: str = "en") -> dict:
     s = get_settings()
     form = [
         ("mode", "payment"),
@@ -123,7 +123,7 @@ def stripe_checkout_session(order_id: str, name: str, unit_amount: int, quantity
         ("phone_number_collection[enabled]", "true"),
         ("success_url", success_url),
         ("cancel_url", cancel_url),
-        ("locale", "pl"),
+        ("locale", "pl" if lang == "pl" else "en"),
     ]
     if image_url:
         form.append(("line_items[0][price_data][product_data][images][0]", image_url))
